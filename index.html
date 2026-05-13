@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mariners Point ROI Tracker</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="masthead" aria-labelledby="app-title">
+        <div class="brand-lockup">
+          <img src="assets/westise.png" alt="Mariners Point member mark" class="brand-logo" />
+          <div>
+            <p class="eyebrow">Mariners Point Golf Center</p>
+            <h1 id="app-title">ROI Tracker</h1>
+          </div>
+        </div>
+      </section>
+
+      <section class="roi-panel" aria-label="Membership ROI summary">
+        <div class="roi-copy">
+          <p class="label">Value used</p>
+          <p class="total" id="totalUsed">$0</p>
+          <p class="subtle" id="balanceLine">$920 left to break even</p>
+        </div>
+        <div class="progress-wrap" aria-label="ROI progress">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-meta">
+            <span id="progressText">0%</span>
+            <span>$920 goal</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="metrics-grid" aria-label="Usage totals">
+        <article class="metric">
+          <div class="metric-topline">
+            <span class="metric-icon">
+              <img src="assets/bunker.svg" alt="Bunker" />
+            </span>
+            <span>$8 each</span>
+          </div>
+          <p class="metric-value" id="shortGameValue">$0</p>
+          <h2>Short game</h2>
+          <p id="shortGameCount">0 visits</p>
+        </article>
+        <article class="metric">
+          <div class="metric-topline">
+            <span class="metric-icon">
+              <img src="assets/golf-flag.svg" alt="Golf flag" />
+            </span>
+            <span>$15 each</span>
+          </div>
+          <p class="metric-value" id="roundValue">$0</p>
+          <h2>9-hole rounds</h2>
+          <p id="roundCount">0 rounds</p>
+        </article>
+        <article class="metric focus">
+          <div class="metric-topline">
+            <span class="metric-icon" aria-hidden="true">$</span>
+            <span>Remaining</span>
+          </div>
+          <p class="metric-value" id="balanceValue">$0</p>
+          <h2>Balance to ROI</h2>
+          <p id="visitsNeeded">Calculating</p>
+        </article>
+      </section>
+
+      <section class="entry-panel" aria-labelledby="entry-title">
+        <div>
+          <p class="eyebrow">Log a visit</p>
+          <h2 id="entry-title">Add today’s usage</h2>
+        </div>
+        <form id="visitForm" class="visit-form">
+          <label>
+            Date
+            <input type="date" id="visitDate" required />
+          </label>
+          <label class="check-row">
+            <input type="checkbox" id="shortGameInput" />
+            <span>Short game</span>
+          </label>
+          <label class="check-row">
+            <input type="checkbox" id="roundInput" />
+            <span>9-hole round</span>
+          </label>
+          <button type="submit">Add visit</button>
+        </form>
+      </section>
+
+      <section class="history-panel">
+        <details class="history-details" open>
+          <summary>
+            <div>
+              <p class="eyebrow">Recent activity</p>
+              <h2 id="history-title">Visits</h2>
+            </div>
+            <span class="summary-cue">Collapse</span>
+          </summary>
+          <div class="history-content">
+            <div class="section-heading">
+              <h3>Monthly totals</h3>
+              <button type="button" class="ghost-button" id="resetButton">Reset local changes</button>
+            </div>
+            <div class="monthly-grid" id="monthlyGrid"></div>
+            <div class="history-list" id="historyList"></div>
+          </div>
+        </details>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-labelledby="title">
+  <title id="title">Golf bunker</title>
+  <rect width="120" height="120" rx="60" fill="#e9f3ec"/>
+  <path d="M19 77c9-18 25-29 47-29 19 0 31 8 37 24-9 17-25 25-48 25-17 0-29-7-36-20z" fill="#e2c46c"/>
+  <path d="M31 76c11 8 25 12 42 9 8-1 15-4 22-8" fill="none" stroke="#c9a24a" stroke-width="6" stroke-linecap="round"/>
+  <path d="M24 74c9-15 23-23 42-23 17 0 28 7 35 20" fill="none" stroke="#0a3326" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="83" cy="41" r="8" fill="#fff"/>
+  <path d="M83 41h.1" stroke="#0a3326" stroke-width="5" stroke-linecap="round"/>
+</svg>
