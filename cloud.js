@@ -107,7 +107,10 @@ async function importApprovedHistory() {
       method: 'POST', headers: { Authorization: 'Bearer ' + token }, cache: 'no-store',
       signal: AbortSignal.timeout(20000),
     });
-    if (!response.ok) throw new Error('Private history could not load');
+    if (!response.ok) {
+      const failure = await response.json().catch(() => ({}));
+      throw new Error(failure.error || 'Private history could not load');
+    }
     const packet = await response.json();
     if (thisSession !== session || !ready || conflict) return;
     const current = window.roiTracker.read();
@@ -120,7 +123,7 @@ async function importApprovedHistory() {
     }
   } catch (error) {
     if (thisSession === session && ready && !conflict) {
-      setStatus('2025 history import needs a retry. Your existing data is safe.', true);
+      setStatus('2025 history: ' + error.message + '. Tap Retry.', true);
       console.warn('History import:', error.message);
     }
   } finally {

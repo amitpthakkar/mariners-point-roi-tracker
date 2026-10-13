@@ -5,7 +5,20 @@ const DOCUMENT = 'https://firestore.googleapis.com/v1/projects/mariners-point-ro
 const headers = { 'Cache-Control': 'private, no-store', 'Content-Type': 'application/json' };
 const reply = (status, error) => new Response(JSON.stringify({ error }), { status, headers });
 
+function readPackage() {
+  const encoded = Netlify.env.get('ROI_IMPORT_2025_V1_GZIP');
+  if (!encoded) throw new Error('History package unavailable');
+  const packet = JSON.parse(gunzipSync(Buffer.from(encoded, 'base64'), { maxOutputLength: 64000 }).toString('utf8'));
+  mergeHistory2025({ years: {} }, packet);
+  return packet;
+}
+
 export default async request => {
+  // Public readiness check exposes no dates, counts, financial values or settings.
+  if (request.method === 'GET') {
+    try { readPackage(); return new Response('{"ready":true}', { status: 200, headers }); }
+    catch (error) { return reply(503, error.message === 'History package unavailable' ? error.message : 'History package validation failed'); }
+  }
   if (request.method !== 'POST') return reply(405, 'Use POST');
   const authorization = request.headers.get('Authorization') || '';
   if (!/^Bearer [A-Za-z0-9._-]{20,8192}$/.test(authorization)) return reply(401, 'Sign in required');
@@ -16,10 +29,7 @@ export default async request => {
       signal: AbortSignal.timeout(12000), redirect: 'error' });
     if (verified.body) await verified.body.cancel();
     if (!verified.ok) return reply([401, 403].includes(verified.status) ? 403 : 503, 'Owner verification unavailable');
-    const encoded = Netlify.env.get('ROI_IMPORT_2025_V1_GZIP');
-    if (!encoded) return reply(503, 'History package unavailable');
-    const packet = JSON.parse(gunzipSync(Buffer.from(encoded, 'base64'), { maxOutputLength: 64000 }).toString('utf8'));
-    mergeHistory2025({ years: {} }, packet); // Validate the server-only package before returning it.
+    const packet = readPackage();
     return new Response(JSON.stringify(packet), { status: 200, headers });
   } catch {
     return reply(503, 'History import temporarily unavailable');
