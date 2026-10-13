@@ -294,9 +294,10 @@ function normalizeYear(year) {
 function defaultState() {
   const currentYear = String(new Date().getFullYear());
   const years = {};
-  ["2026", "2027", "2028", "2029", "2030", currentYear].forEach((year) => {
+  ["2025", "2026", "2027", "2028", "2029", "2030", currentYear].forEach((year) => {
     years[year] = makeEmptyYear();
   });
+  years["2025"].membershipCost = 900;
   return { version: 2, appDataVersion: DATA_SCHEMA_VERSION, selectedYear: "2026", years, practiceLogs: [] };
 }
 
@@ -393,7 +394,7 @@ function getPracticeLogs() {
 
 function getMembershipCost(year = getSelectedYear()) {
   const configured = Number(ensureYear(year).membershipCost);
-  return Number.isFinite(configured) && configured > 0 ? configured : MEMBERSHIP_COST;
+  return Number.isFinite(configured) && configured > 0 ? configured : String(year) === "2025" ? 900 : MEMBERSHIP_COST;
 }
 
 function getSeededVisits(year) {
@@ -583,7 +584,7 @@ function membershipMessage(roiTotals) {
 }
 
 function renderYearOptions() {
-  const years = new Set(["2026", "2027", "2028", "2029", "2030", ...Object.keys(state.years)]);
+  const years = new Set(["2025", "2026", "2027", "2028", "2029", "2030", ...Object.keys(state.years)]);
   els.yearSelect.innerHTML = "";
   [...years]
     .sort()
