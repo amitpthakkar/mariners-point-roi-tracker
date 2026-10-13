@@ -6,6 +6,7 @@ const headers = { 'Cache-Control': 'private, no-store', 'Content-Type': 'applica
 const reply = (status, error) => new Response(JSON.stringify({ error }), { status, headers });
 
 function readPackage() {
+  // The existing private site setting is populated before this function deploys.
   // Node Functions receive injected settings through process.env; the Netlify
   // runtime API can omit Functions-scoped values on this deployed runtime.
   const encoded = Netlify.env.get('ROI_HISTORY_2025_PACKET_V3') || process.env.ROI_HISTORY_2025_PACKET_V3;
