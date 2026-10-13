@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 120" role="img" aria-labelledby="title">
+  <title id="title">Yellow range basket</title>
+  <g fill="none" stroke="#f1ca2f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M28 36c7-16 77-16 84 0"/>
+    <path d="M24 39l13 61c2 8 64 8 66 0l13-61"/>
+    <path d="M37 100c8-14 10-40 7-62"/>
+    <path d="M103 100c-8-14-10-40-7-62"/>
+    <path d="M56 105c3-22 4-45 3-69"/>
+    <path d="M84 105c-3-22-4-45-3-69"/>
+    <path d="M30 55c22 7 58 7 80 0"/>
+    <path d="M34 73c20 7 52 7 72 0"/>
+    <path d="M39 90c17 5 45 5 62 0"/>
+    <path d="M22 34c8-28 88-28 96 0"/>
+    <circle cx="22" cy="37" r="4"/>
+    <circle cx="118" cy="37" r="4"/>
+  </g>
+</svg>

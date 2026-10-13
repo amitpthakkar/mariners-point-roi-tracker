@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 150" role="img" aria-labelledby="title">
+  <title id="title">Golf flag on green</title>
+  <rect width="180" height="150" fill="#fffdf7"/>
+  <path d="M19 92c14-27 54-32 87-26 26 5 56 2 67 22 11 19-7 43-43 50-43 9-105-1-123-25-7-9-4-15 12-21z" fill="#3aa233"/>
+  <ellipse cx="58" cy="104" rx="20" ry="10" fill="#0a3025"/>
+  <circle cx="112" cy="96" r="8" fill="#fffdf7"/>
+  <path d="M59 21v88" stroke="#f0b018" stroke-width="7" stroke-linecap="round"/>
+  <path d="M63 22c20-5 37 7 58 0-10 12-28 24-58 18z" fill="#ed3b36"/>
+</svg>

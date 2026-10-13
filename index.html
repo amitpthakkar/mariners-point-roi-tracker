@@ -2,36 +2,136 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=d2be3684-5763-402c-91ab-18bfb5675ed0
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Mariners Point ROI Tracker</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Mariners Point" />
+    <meta name="application-name" content="Mariners Point" />
+    <meta name="theme-color" content="#0f172a" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="app-shell">
+    <section id="cloudGate" class="cloud-gate" aria-labelledby="cloudTitle">
+      <div class="cloud-card">
+        <img src="assets/westise.png" alt="" class="cloud-logo" />
+        <h1 id="cloudTitle">Your golf. Everywhere.</h1>
+        <p>Sign in to your private Mariners Point tracker.</p>
+        <button type="button" id="googleSignIn" disabled>Continue with Google</button>
+        <p id="cloudGateMessage" role="status">Connecting securely...</p>
+      </div>
+    </section>
+    <div id="cloudBar" class="cloud-bar" hidden>
+      <span id="cloudAccount"></span>
+      <span id="cloudStatus" role="status"></span>
+      <button type="button" id="cloudRetry" hidden>Retry sync</button>
+      <button type="button" id="cloudReload" hidden>Load cloud version</button>
+      <button type="button" id="googleSignOut">Sign out</button>
+    </div>
+    <main class="app-shell" inert hidden>
+      <nav class="app-tabs" aria-label="App sections">
+        <button type="button" class="tab-button active" data-tab-target="roi">Mariners Point Membership Status</button>
+        <button type="button" class="tab-button" data-tab-target="academy">Patrick Grimes Academy</button>
+      </nav>
+
+      <section class="tab-panel active" id="roiTab" data-tab-panel="roi">
       <section class="masthead" aria-labelledby="app-title">
         <div class="brand-lockup">
           <img src="assets/westise.png" alt="Mariners Point member mark" class="brand-logo" />
           <div>
-            <p class="eyebrow">Mariners Point Golf Center</p>
-            <h1 id="app-title">ROI Tracker</h1>
+            <h1 id="app-title">Mariners Point Membership Status</h1>
           </div>
+        </div>
+
+        <div class="year-controls" aria-label="Year controls">
+          <label>
+            Tracking year
+            <select id="yearSelect"></select>
+          </label>
+          <label>
+            Membership cost
+            <input type="number" id="membershipCostInput" min="0" step="1" inputmode="numeric" />
+          </label>
+          <button type="button" class="secondary-button" id="addYearButton">Add year</button>
         </div>
       </section>
 
-      <section class="roi-panel" aria-label="Membership ROI summary">
-        <div class="roi-copy">
-          <p class="label">Value used</p>
-          <p class="total" id="totalUsed">$0</p>
-          <p class="subtle" id="balanceLine">$920 left to break even</p>
+      <section class="worth-section" aria-label="Membership ROI summary">
+        <article class="worth-card">
+          <div class="worth-copy">
+            <p class="label" id="heroStatusLabel">Still earning it</p>
+            <p class="hero-message" id="heroMessage">A few more good sessions and this starts looking very tidy.</p>
+          </div>
+
+          <div class="roi-ring-wrap" aria-label="ROI progress">
+            <div class="roi-ring" id="roiRing">
+              <span id="roiRingPercent">0%</span>
+            </div>
+            <p id="roiRingCaption">toward break-even</p>
+          </div>
+
+          <div class="hero-stats" aria-label="ROI details">
+            <div>
+              <span>Membership Cost</span>
+              <strong id="membershipCostValue">$920</strong>
+            </div>
+            <div>
+              <span>Value used</span>
+              <strong id="totalValueHero">$0</strong>
+            </div>
+            <div>
+              <span>Visits logged</span>
+              <strong id="visitsLogged">0</strong>
+            </div>
+            <div>
+              <span>Avg cost / visit</span>
+              <strong id="avgCostPerVisit">—</strong>
+            </div>
+            <div>
+              <span>Balls Hit</span>
+              <strong id="ballsHitValue">0</strong>
+            </div>
+            <div>
+              <span>Bucket Value</span>
+              <strong id="bucketValueHero">$0</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="quick-add-panel" aria-label="Quick add activity">
+        <div>
+          <p class="eyebrow">One-tap logging</p>
+          <h2>Log today</h2>
         </div>
-        <div class="progress-wrap" aria-label="ROI progress">
-          <div class="progress-track">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-          <div class="progress-meta">
-            <span id="progressText">0%</span>
-            <span>$920 goal</span>
-          </div>
+        <div class="quick-buttons">
+          <button type="button" data-quick-action="range">
+            <span>Range Small Bucket</span>
+            <small>Small bucket · $11 · 45 balls</small>
+            <small class="last-log" data-last-logged="range">Not logged yet</small>
+          </button>
+          <button type="button" data-quick-action="short-game">
+            <span>Short Game</span>
+            <small>$8 ROI value</small>
+            <small class="last-log" data-last-logged="short-game">Not logged yet</small>
+          </button>
+          <button type="button" data-quick-action="nine-holes">
+            <span>9 Holes</span>
+            <small>$15 ROI value</small>
+            <small class="last-log" data-last-logged="nine-holes">Not logged yet</small>
+          </button>
+          <button type="button" data-quick-action="yellow-basket">
+            <span>Yellow Basket</span>
+            <small>$5 ROI value</small>
+            <small class="last-log" data-last-logged="yellow-basket">Not logged yet</small>
+          </button>
         </div>
       </section>
 
@@ -55,63 +155,286 @@
             <span>$15 each</span>
           </div>
           <p class="metric-value" id="roundValue">$0</p>
-          <h2>9-hole rounds</h2>
+          <h2>Rounds</h2>
           <p id="roundCount">0 rounds</p>
         </article>
-        <article class="metric focus">
+        <article class="metric">
           <div class="metric-topline">
-            <span class="metric-icon" aria-hidden="true">$</span>
-            <span>Remaining</span>
+            <span class="metric-icon">
+              <img src="assets/yellow-basket.svg" alt="Yellow basket" />
+            </span>
+            <span>$5 each</span>
           </div>
-          <p class="metric-value" id="balanceValue">$0</p>
-          <h2>Balance to ROI</h2>
-          <p id="visitsNeeded">Calculating</p>
+          <p class="metric-value" id="yellowBasketValue">$0</p>
+          <h2>Yellow Basket</h2>
+          <p id="yellowBasketCount">0 logged</p>
         </article>
       </section>
 
-      <section class="entry-panel" aria-labelledby="entry-title">
-        <div>
-          <p class="eyebrow">Log a visit</p>
-          <h2 id="entry-title">Add today’s usage</h2>
-        </div>
-        <form id="visitForm" class="visit-form">
-          <label>
+      <section class="action-grid" aria-label="Logging controls">
+        <article class="bucket-panel" aria-labelledby="bucket-title">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Practice buckets</p>
+              <h2 id="bucket-title">Separate from ROI</h2>
+            </div>
+            <span class="separate-pill">Not in ROI</span>
+          </div>
+          <label class="bucket-date">
             Date
-            <input type="date" id="visitDate" required />
+            <input type="date" id="bucketDate" required />
           </label>
-          <label class="check-row">
-            <input type="checkbox" id="shortGameInput" />
-            <span>Short game</span>
-          </label>
-          <label class="check-row">
-            <input type="checkbox" id="roundInput" />
-            <span>9-hole round</span>
-          </label>
-          <button type="submit">Add visit</button>
-        </form>
+          <div class="bucket-buttons" aria-label="Log bucket">
+            <button type="button" data-bucket-size="small">
+              <span>Small $11 · 45</span>
+              <small class="last-log" data-last-logged="small-bucket">Not logged yet</small>
+            </button>
+            <button type="button" data-bucket-size="medium">
+              <span>Medium $17 · 95</span>
+              <small class="last-log" data-last-logged="medium-bucket">Not logged yet</small>
+            </button>
+            <button type="button" data-bucket-size="large">
+              <span>Large $22 · 150</span>
+              <small class="last-log" data-last-logged="large-bucket">Not logged yet</small>
+            </button>
+          </div>
+        </article>
+
       </section>
 
-      <section class="history-panel">
-        <details class="history-details" open>
+      <section class="bucket-summary" aria-label="Bucket totals">
+        <article class="bucket-stat">
+          <span>Small</span>
+          <strong id="smallBucketCount">0</strong>
+        </article>
+        <article class="bucket-stat">
+          <span>Medium</span>
+          <strong id="mediumBucketCount">0</strong>
+        </article>
+        <article class="bucket-stat">
+          <span>Large</span>
+          <strong id="largeBucketCount">0</strong>
+        </article>
+        <article class="bucket-stat total-bucket">
+          <span>Bucket value</span>
+          <strong id="bucketSpend">$0</strong>
+        </article>
+      </section>
+
+      <section class="manual-panel entry-panel" aria-labelledby="entry-title">
+        <details>
           <summary>
             <div>
-              <p class="eyebrow">Recent activity</p>
-              <h2 id="history-title">Visits</h2>
+              <p class="eyebrow">Missed something?</p>
+              <h2 id="entry-title">Manual Entry</h2>
             </div>
-            <span class="summary-cue">Collapse</span>
+            <span class="summary-cue">Open</span>
+          </summary>
+          <form id="visitForm" class="visit-form">
+            <label>
+              Date
+              <input type="date" id="visitDate" required />
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="shortGameInput" />
+              <span>Short game</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="roundInput" />
+              <span>Round</span>
+            </label>
+            <label class="check-row">
+              <input type="checkbox" id="yellowBasketInput" />
+              <span>Yellow Basket</span>
+            </label>
+            <button type="submit">Add visit</button>
+          </form>
+        </details>
+      </section>
+
+      <section class="history-panel" aria-labelledby="history-title">
+        <div class="section-heading chart-heading">
+          <div>
+            <p class="eyebrow">Year activity</p>
+            <h2 id="history-title">Monthly Value</h2>
+          </div>
+          <div class="chart-legend" aria-label="Chart legend">
+            <span class="legend-short">Short Game</span>
+            <span class="legend-round">Rounds</span>
+            <span class="legend-yellow">Yellow Basket</span>
+            <span class="legend-bucket">Range Buckets</span>
+          </div>
+        </div>
+        <div class="monthly-grid monthly-chart" id="monthlyGrid"></div>
+      </section>
+
+      <section class="entries-panel history-panel">
+        <details class="history-details">
+          <summary>
+            <div>
+              <p class="eyebrow">Review or delete</p>
+              <h2>Activity Log</h2>
+            </div>
+            <span class="summary-cue">Open</span>
           </summary>
           <div class="history-content">
-            <div class="section-heading">
-              <h3>Monthly totals</h3>
-              <button type="button" class="ghost-button" id="resetButton">Reset local changes</button>
-            </div>
-            <div class="monthly-grid" id="monthlyGrid"></div>
             <div class="history-list" id="historyList"></div>
           </div>
         </details>
       </section>
+
+      <section class="data-panel" aria-labelledby="data-title">
+        <details>
+          <summary>
+            <div>
+              <p class="eyebrow">Utility</p>
+              <h2 id="data-title">Backup & Data Tools</h2>
+            </div>
+            <span class="summary-cue">Open</span>
+          </summary>
+          <div class="data-tools">
+            <p>
+              Import CSV rows for the selected year. Use columns:
+              <strong>date, shortGame, round, small, medium, large, holes, yellowBasket</strong>.
+            </p>
+            <textarea id="importText" rows="6" placeholder="2026-01-07,true,false,0,0,0"></textarea>
+            <div class="data-actions">
+              <button type="button" class="secondary-button" id="exportButton">Export backup</button>
+              <button type="button" id="importButton">Import to selected year</button>
+              <button type="button" class="secondary-button" id="restoreButton">Restore backup</button>
+              <button type="button" class="danger-button" id="resetDataButton">Reset All Data</button>
+            </div>
+          </div>
+        </details>
+      </section>
+      </section>
+
+      <section class="tab-panel academy-tab" id="academyTab" data-tab-panel="academy" hidden>
+        <section class="academy-hero" aria-labelledby="academy-title">
+          <span class="pg-logo-frame">
+            <img src="assets/pg-logo.svg" alt="Patrick Grimes PG logo" class="pg-logo" />
+          </span>
+          <h1 id="academy-title">Patrick Grimes Academy Practice Plan</h1>
+        </section>
+
+        <section class="swing-thought-card" aria-label="Today's swing thought">
+          <div>
+            <p class="eyebrow">Today's Swing Thought</p>
+            <p id="swingThoughtText">Practice with purpose. Play with freedom.</p>
+          </div>
+          <button type="button" class="quote-button" id="newQuoteButton" aria-label="Show a new swing thought">New quote</button>
+        </section>
+
+        <section class="practice-summary" aria-label="Practice summary">
+          <article>
+            <span>Completed This Week</span>
+            <strong id="practiceWeekCount">0</strong>
+          </article>
+          <article>
+            <span>Total Completed This Year</span>
+            <strong id="practiceYearCount">0</strong>
+          </article>
+          <article>
+            <span>Total Practice Time YTD</span>
+            <strong id="practiceYtdMinutes">0 min</strong>
+          </article>
+        </section>
+
+        <section class="practice-breakdown-panel" aria-labelledby="practice-breakdown-title">
+          <div class="practice-breakdown-heading">
+            <div>
+              <p class="eyebrow">Analytics</p>
+              <h2 id="practice-breakdown-title">Practice Time Breakdown</h2>
+            </div>
+          </div>
+          <div class="practice-breakdown-chart" id="practiceBreakdownChart"></div>
+        </section>
+
+        <section class="practice-days" aria-label="Practice day plans">
+          <article class="practice-card" data-practice-day="1">
+            <div class="practice-card-top">
+              <div>
+                <p class="eyebrow">Day 1</p>
+                <h2>Technique, driver, scoring drills</h2>
+              </div>
+              <strong><span data-practice-completed="1">0</span>/90 min</strong>
+            </div>
+            <div class="practice-blocks">
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="1" data-block-minutes="30" data-block-category="Technique" value="Technique Work · 30 min" /><span class="practice-block-label">Technique Work · 30 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="1" data-block-minutes="30" data-block-category="Driver" value="Driver Accuracy · 30 min" /><span class="practice-block-label">Driver Accuracy · 30 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="1" data-block-minutes="15" data-block-category="Putting" value="4-5-6 Putting Drill · 15 min" /><span class="practice-block-label">4-5-6 Putting Drill · 15 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="1" data-block-minutes="15" data-block-category="Putting" value="Endzone Lag Putting · 15 min" /><span class="practice-block-label">Endzone Lag Putting · 15 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+            </div>
+            <textarea id="practiceNotes1" rows="3" placeholder="Driver felt better today"></textarea>
+            <button type="button" data-complete-practice="1">Log Day 1</button>
+          </article>
+
+          <article class="practice-card" data-practice-day="2">
+            <div class="practice-card-top">
+              <div>
+                <p class="eyebrow">Day 2</p>
+                <h2>Technique, wedges, short game</h2>
+              </div>
+              <strong><span data-practice-completed="2">0</span>/90 min</strong>
+            </div>
+            <div class="practice-blocks">
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="2" data-block-minutes="30" data-block-category="Technique" value="Technique Work · 30 min" /><span class="practice-block-label">Technique Work · 30 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="2" data-block-minutes="20" data-block-category="Pitching" value="Pitching / Wedges · 20 min" /><span class="practice-block-label">Pitching / Wedges · 20 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="2" data-block-minutes="25" data-block-category="Chipping" value="Chipping · 25 min" /><span class="practice-block-label">Chipping · 25 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="2" data-block-minutes="15" data-block-category="Bunker" value="Bunker Work · 15 min" /><span class="practice-block-label">Bunker Work · 15 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+            </div>
+            <textarea id="practiceNotes2" rows="3" placeholder="Wedges were dialed"></textarea>
+            <button type="button" data-complete-practice="2">Log Day 2</button>
+          </article>
+
+          <article class="practice-card" data-practice-day="3">
+            <div class="practice-card-top">
+              <div>
+                <p class="eyebrow">Day 3</p>
+                <h2>Technique, putting, chipping</h2>
+              </div>
+              <strong><span data-practice-completed="3">0</span>/85 min</strong>
+            </div>
+            <div class="practice-blocks">
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="3" data-block-minutes="30" data-block-category="Technique" value="Technique Work · 30 min" /><span class="practice-block-label">Technique Work · 30 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="3" data-block-minutes="20" data-block-category="Putting" value="4-5-6 Putting Drill · 20 min" /><span class="practice-block-label">4-5-6 Putting Drill · 20 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="3" data-block-minutes="20" data-block-category="Putting" value="Endzone Lag Putting · 20 min" /><span class="practice-block-label">Endzone Lag Putting · 20 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="3" data-block-minutes="15" data-block-category="Chipping" value="Chipping · 15 min" /><span class="practice-block-label">Chipping · 15 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
+            </div>
+            <textarea id="practiceNotes3" rows="3" placeholder="Putting drill was tough"></textarea>
+            <button type="button" data-complete-practice="3">Log Day 3</button>
+          </article>
+        </section>
+
+        <section class="practice-history-panel" aria-labelledby="practice-history-title">
+          <details>
+            <summary>
+              <div>
+                <p class="eyebrow">Practice history</p>
+                <h2 id="practice-history-title">Practice History</h2>
+              </div>
+              <span class="summary-cue">Open</span>
+            </summary>
+            <div class="practice-history-list" id="practiceHistoryList"></div>
+          </details>
+        </section>
+      </section>
     </main>
 
-    <script src="app.js"></script>
+    <dialog id="confirmDialog">
+      <form method="dialog" class="confirm-card">
+        <h2 id="confirmTitle">Confirm change</h2>
+        <p id="confirmMessage">This action cannot be undone.</p>
+        <div class="confirm-actions">
+          <button value="cancel" class="secondary-button">Cancel</button>
+          <button value="confirm" id="confirmActionButton">Confirm</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <input type="file" id="restoreFile" accept="application/json" hidden />
+    <script src="app.js?v=20261013-cloud"></script>
+    <script type="module" src="cloud.js?v=20261013-cloud"></script>
   </body>
 </html>

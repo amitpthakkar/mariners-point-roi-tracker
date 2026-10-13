@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-labelledby="title">
+  <title id="title">Patrick Grimes PG logo</title>
+  <defs>
+    <linearGradient id="pg-ring" x1="24" y1="144" x2="156" y2="36" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f5c53a"/>
+      <stop offset="0.5" stop-color="#ff6a2f"/>
+      <stop offset="1" stop-color="#ff2aa7"/>
+    </linearGradient>
+  </defs>
+  <circle cx="90" cy="90" r="78" fill="#050505" stroke="url(#pg-ring)" stroke-width="7"/>
+  <path d="M32 101V72h46c18 0 28 7 28 20 0 14-11 22-30 22H55v18H32v-31Zm23-8h22c7 0 11-3 11-8s-4-8-11-8H55v16Z" fill="#fff"/>
+  <path d="M102 114c-24 0-37-8-37-22 0-15 14-23 39-23 20 0 33 5 38 15h-24c-3-3-8-5-15-5-11 0-18 5-18 13s7 13 18 13c9 0 15-2 18-7h-20V88h45v26h-17l-2-7c-6 5-14 7-25 7Z" fill="#fff"/>
+  <circle cx="137" cy="50" r="13" fill="#f44342"/>
+  <path d="M132 46c5-5 11-5 16-2" fill="none" stroke="#ff9a9a" stroke-width="3" stroke-linecap="round"/>
+</svg>
