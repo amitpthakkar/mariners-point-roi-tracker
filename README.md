@@ -18,7 +18,7 @@ Firestore rules are versioned in `firestore.rules`.
 
 An approved 2025 spreadsheet import is served by `history-2025` only after Firestore
 authorizes the signed-in owner's token. The dated source data is held in the private
-server setting `ROI_HISTORY_2025_PACKET_V3`, never in this repository
+secret Functions-only setting `ROI_HISTORY_2025_PACKET_V3`, never in this repository
 or the static publish directory. On authenticated load, the app adds the year using
 its normal revision-checked save queue. The import marker prevents repeated imports
 and preserves subsequent edits/deletions. Existing 2025 ROI entries require
