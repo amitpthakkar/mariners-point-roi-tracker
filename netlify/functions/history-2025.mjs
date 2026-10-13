@@ -8,7 +8,7 @@ const reply = (status, error) => new Response(JSON.stringify({ error }), { statu
 function readPackage() {
   // Node Functions receive injected settings through process.env; the Netlify
   // runtime API can omit Functions-scoped values on this deployed runtime.
-  const encoded = Netlify.env.get('ROI_HISTORY_2025_PACKET_V2') || process.env.ROI_HISTORY_2025_PACKET_V2;
+  const encoded = Netlify.env.get('ROI_HISTORY_2025_PACKET_V3') || process.env.ROI_HISTORY_2025_PACKET_V3;
   if (!encoded) throw new Error('History package unavailable');
   const packet = JSON.parse(gunzipSync(Buffer.from(encoded, 'base64'), { maxOutputLength: 64000 }).toString('utf8'));
   mergeHistory2025({ years: {} }, packet);
