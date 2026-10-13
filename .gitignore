@@ -1,4 +1,5 @@
 .netlify
 node_modules
+dist
 *backup*.json
 *migration*.json

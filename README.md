@@ -12,6 +12,15 @@ Existing Netlify tracker with Google sign-in and private Cloud Firestore storage
 - First connection merges additional device records by their stable IDs. Conflicting versions with the same ID retain the cloud record.
 - On a conflict, export the device backup and load the cloud version before editing.
 
-Deployment uses the existing Netlify Git integration. No build command is required.
+Deployment uses the existing Netlify Git integration. `node scripts/build.mjs` copies only public assets into `dist`.
 Firebase web configuration is public; authorization is enforced by Firestore rules.
 Firestore rules are versioned in `firestore.rules`.
+
+An approved 2025 spreadsheet import is served by `history-2025` only after Firestore
+authorizes the signed-in owner's token. The dated source data is held in the secret,
+production, Functions-only setting `ROI_IMPORT_2025_V1_GZIP`, never in this repository
+or the static publish directory. On authenticated load, the app adds the year using
+its normal revision-checked save queue. The import marker prevents repeated imports
+and preserves subsequent edits/deletions. Existing 2025 ROI entries require
+reconciliation rather than being guessed or overwritten. Other years, buckets and
+practice logs are retained. A device recovery snapshot is stored before import.

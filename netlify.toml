@@ -1,3 +1,7 @@
 [build]
-  publish = "."
-  command = ""
+  publish = "dist"
+  command = "node scripts/build.mjs"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"

@@ -1,4 +1,5 @@
 import { mergeInitialState } from './cloud-state.js';
+import { HISTORY_IMPORT_ID, mergeHistory2025 } from './history-import.js';
 
 const OWNER = 'amitpthakkar@gmail.com';
 const gate = document.querySelector('#cloudGate');
@@ -14,6 +15,7 @@ const PENDING = 'roi-cloud-pending-v1';
 const ORIGINAL = 'roi-cloud-before-migration-v1';
 let auth, authSdk, db, fs, ref, revision = 0, ready = false, pending = null;
 let saving = false, conflict = false, stopListening = null, timer, session = 0;
+let importingHistory = false;
 
 function setStatus(text, error = false) {
   status.textContent = text;
@@ -95,6 +97,36 @@ function pauseEdits(event) {
 function resumeEdits() {
   for (const type of ['click', 'input', 'change', 'submit']) main.removeEventListener(type, pauseEdits, true);
 }
+async function importApprovedHistory() {
+  if (!ready || conflict || importingHistory || window.roiTracker.read().years?.['2025']?.historyImports?.[HISTORY_IMPORT_ID]) return;
+  const thisSession = session;
+  importingHistory = true;
+  try {
+    const token = await auth.currentUser.getIdToken();
+    const response = await fetch('/.netlify/functions/history-2025', {
+      method: 'POST', headers: { Authorization: 'Bearer ' + token }, cache: 'no-store',
+      signal: AbortSignal.timeout(20000),
+    });
+    if (!response.ok) throw new Error('Private history could not load');
+    const packet = await response.json();
+    if (thisSession !== session || !ready || conflict) return;
+    const current = window.roiTracker.read();
+    const merged = mergeHistory2025(current, packet);
+    if (merged !== current) {
+      localStorage.setItem('roi-cloud-before-history-2025-v1', JSON.stringify(current));
+      window.roiTracker.apply(merged);
+      keepPending(window.roiTracker.read());
+      await flush();
+    }
+  } catch (error) {
+    if (thisSession === session && ready && !conflict) {
+      setStatus('2025 history import needs a retry. Your existing data is safe.', true);
+      console.warn('History import:', error.message);
+    }
+  } finally {
+    if (thisSession === session) importingHistory = false;
+  }
+}
 window.addEventListener('roi-state-saved', event => {
   if (!ready || conflict) return;
   keepPending(event.detail);
@@ -105,7 +137,7 @@ window.addEventListener('online', flush);
 window.addEventListener('beforeunload', event => {
   if (pending) { event.preventDefault(); event.returnValue = ''; }
 });
-retry.addEventListener('click', flush);
+retry.addEventListener('click', async () => { await flush(); await importApprovedHistory(); });
 reload.addEventListener('click', async () => {
   if (!window.confirm('Load the newer cloud version? Your unsynced device version will be kept in a recovery backup. Export it first if you want a separate file.')) return;
   try {
@@ -114,6 +146,7 @@ reload.addEventListener('click', async () => {
     acceptSnapshot(snapshot);
     pending = null; localStorage.removeItem(PENDING); conflict = false;
     resumeEdits(); setStatus('Cloud saved');
+    await importApprovedHistory();
   } catch { setStatus('Cloud could not be loaded. Your device data is safe.', true); }
 });
 document.querySelector('#googleSignOut').addEventListener('click', async () => {
@@ -153,7 +186,7 @@ try {
   a.onAuthStateChanged(auth, async user => {
     const thisSession = ++session;
     if (stopListening) { stopListening(); stopListening = null; }
-    clearTimeout(timer); resumeEdits(); conflict = false;
+    clearTimeout(timer); resumeEdits(); conflict = false; importingHistory = false;
     lock(user ? 'Loading your saved tracker...' : 'Use your approved Google account to continue.');
     if (!user) { login.textContent = 'Continue with Google'; login.disabled = false; return; }
     if (user.email?.toLowerCase() !== OWNER || !user.emailVerified) {
@@ -185,6 +218,7 @@ try {
         if (!ready || saving || pending || conflict || newer.metadata.hasPendingWrites || newer.metadata.fromCache) return;
         if (newer.exists() && newer.data().revision > revision) acceptSnapshot(newer);
       }, () => setStatus('Cloud connection interrupted. Device backup retained.', true));
+      await importApprovedHistory();
     } catch (error) {
       lock('Could not load your cloud tracker. Check your connection, then reload. Your existing device data is safe.');
       console.warn('Cloud load:', error.code || error.message);

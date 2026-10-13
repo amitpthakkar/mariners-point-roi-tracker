@@ -584,11 +584,6 @@ function membershipMessage(roiTotals) {
 
 function renderYearOptions() {
   const years = new Set(["2026", "2027", "2028", "2029", "2030", ...Object.keys(state.years)]);
-  years.delete("2025");
-  if (getSelectedYear() === "2025") {
-    state.selectedYear = "2026";
-    saveState();
-  }
   els.yearSelect.innerHTML = "";
   [...years]
     .sort()
