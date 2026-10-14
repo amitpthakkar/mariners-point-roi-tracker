@@ -13,7 +13,18 @@ const PRACTICE_DAYS = {
   2: { label: "Day 2", minutes: 90 },
   3: { label: "Day 3", minutes: 85 },
 };
-const PRACTICE_CATEGORIES = ["Technique", "Driver", "Chipping", "Putting", "Bunker", "Pitching"];
+const PRACTICE_CATEGORIES = ["Technique", "Driver", "Chipping", "Putting", "Bunker", "Pitching", "On-course simulation"];
+const PRACTICE_TARGETS = { Technique: 25, Driver: 15, Chipping: 10, Putting: 15, Bunker: 5, Pitching: 10, "On-course simulation": 20 };
+const PRACTICE_ACTIVITIES = [
+  { id: "technique", label: "Technique Work", category: "Technique", minutes: 30 },
+  { id: "driver", label: "Driver Accuracy", category: "Driver", minutes: 30 },
+  { id: "putting-456", label: "4-5-6 Putting Drill", category: "Putting", minutes: 15 },
+  { id: "putting-lag", label: "Endzone Lag Putting", category: "Putting", minutes: 15 },
+  { id: "pitching", label: "Pitching / Wedges", category: "Pitching", minutes: 20 },
+  { id: "chipping", label: "Chipping", category: "Chipping", minutes: 25 },
+  { id: "bunker", label: "Bunker Work", category: "Bunker", minutes: 15 },
+  { id: "on-course", label: "On-course simulation", category: "On-course simulation", minutes: 30 },
+];
 const PRACTICE_DAY_CATEGORY_BLOCKS = {
   1: [
     { category: "Technique", minutes: 30 },
@@ -131,6 +142,17 @@ const els = {
   practiceYtdMinutes: document.querySelector("#practiceYtdMinutes"),
   practiceBreakdownChart: document.querySelector("#practiceBreakdownChart"),
   practiceHistoryList: document.querySelector("#practiceHistoryList"),
+  practiceYearSelect: document.querySelector("#practiceYearSelect"),
+  practiceCompareYear: document.querySelector("#practiceCompareYear"),
+  practiceComparison: document.querySelector("#practiceComparison"),
+  practiceDate: document.querySelector("#practiceDate"),
+  practiceSessionForm: document.querySelector("#practiceSessionForm"),
+  practiceSessionNotes: document.querySelector("#practiceSessionNotes"),
+  practiceActivityList: document.querySelector("#practiceActivityList"),
+  practiceSelectedMinutes: document.querySelector("#practiceSelectedMinutes"),
+  practiceYearLabel: document.querySelector("#practiceYearLabel"),
+  practiceTimeLabel: document.querySelector("#practiceTimeLabel"),
+  practiceHistoryYear: document.querySelector("#practiceHistoryYear"),
 };
 
 const money = new Intl.NumberFormat("en-US", {
@@ -224,7 +246,7 @@ function normalizePracticeBlock(block) {
 }
 
 function normalizePracticeLog(log = {}, index = 0) {
-  const day = PRACTICE_DAYS[log.day] ? Number(log.day) : 1;
+  const day = log.sessionType === "activities" ? 0 : PRACTICE_DAYS[log.day] ? Number(log.day) : 1;
   const blocks = Array.isArray(log.blocks) ? log.blocks.map(normalizePracticeBlock) : [];
   const minutesFromBlocks = blocks.reduce((total, block) => total + Number(block.minutes || 0), 0);
   return {
@@ -232,7 +254,7 @@ function normalizePracticeLog(log = {}, index = 0) {
     id: log.id || `recovered-practice-${Date.now()}-${index}`,
     date: /^\d{4}-\d{2}-\d{2}$/.test(log.date || "") ? log.date : todayDateString(),
     day,
-    minutes: minutesFromBlocks || Number(log.minutes || PRACTICE_DAYS[day].minutes || 0),
+    minutes: minutesFromBlocks || Number(log.minutes || PRACTICE_DAYS[day]?.minutes || 0),
     blocks,
     notes: String(log.notes || ""),
     createdAt: log.createdAt || new Date().toISOString(),
@@ -264,6 +286,7 @@ function normalizeStateShape(input = {}) {
     version: 2,
     appDataVersion: DATA_SCHEMA_VERSION,
     selectedYear: input.selectedYear ? normalizeYear(input.selectedYear) : base.selectedYear,
+    selectedPracticeYear: /^\d{4}$/.test(String(input.selectedPracticeYear || "")) ? String(input.selectedPracticeYear) : String(new Date().getFullYear()),
     years,
     practiceLogs: Array.isArray(input.practiceLogs) ? input.practiceLogs.map(normalizePracticeLog) : [],
   };
@@ -749,6 +772,7 @@ function practiceBlockCategory(block) {
     return block.category;
   }
   const label = String(typeof block === "object" && block !== null ? block.label : block || "").toLowerCase();
+  if (label.includes("on-course") || label.includes("on course") || label.includes("simulation")) return "On-course simulation";
   if (label.includes("technique")) return "Technique";
   if (label.includes("driver")) return "Driver";
   if (label.includes("bunker")) return "Bunker";
@@ -762,6 +786,7 @@ function normalizePracticeLabel(label) {
   return String(label || "")
     .toLowerCase()
     .replace(/[·:]/g, " ")
+    .replace(/\b\d+\s*min\b/g, "")
     .replace(/\bwork\b/g, "")
     .replace(/\bpractice\b/g, "")
     .replace(/\s+/g, " ")
@@ -807,7 +832,7 @@ function lastPracticeRowDate(rowInput, logs) {
     const blocks = Array.isArray(log.blocks) ? log.blocks : [];
     if (!blocks.length) {
       const matchingTemplate = (PRACTICE_DAY_CATEGORY_BLOCKS[log.day] || []).some(
-        (block) => block.category === rowCategory && block.minutes === rowMinutes && Number(log.day) === rowDay,
+        (block) => block.category === rowCategory && (!rowInput.dataset.blockDay || (block.minutes === rowMinutes && Number(log.day) === rowDay)),
       );
       if (matchingTemplate) fallbackDate ||= log.date;
       continue;
@@ -858,93 +883,118 @@ function practiceBreakdown(logs) {
 function renderPracticeBreakdown(logs) {
   const totals = practiceBreakdown(logs);
   const totalMinutes = Object.values(totals).reduce((sum, value) => sum + value, 0);
-  if (!totalMinutes) {
-    els.practiceBreakdownChart.innerHTML =
-      '<p class="empty-note">No practice data yet. Log a session to see your breakdown.</p>';
-    return;
-  }
-
-  els.practiceBreakdownChart.innerHTML = PRACTICE_CATEGORIES.map((category) => {
+  els.practiceBreakdownChart.innerHTML = PRACTICE_CATEGORIES.map(category => {
     const minutes = totals[category];
-    const percent = (minutes / totalMinutes) * 100;
-    const percentLabel = percent % 1 === 0 ? `${percent.toFixed(0)}%` : `${percent.toFixed(1)}%`;
-    return `
-      <div class="practice-breakdown-row" style="--practice-percent: ${minutes ? Math.max(percent, 2) : 0}%; --practice-color: var(--practice-${category.toLowerCase()});">
-        <div class="practice-breakdown-label">
-          <strong>${category}</strong>
-          <span>${minutes.toLocaleString("en-US")} min · ${percentLabel}</span>
-        </div>
-        <div class="practice-breakdown-track" aria-label="${category}: ${minutes} minutes, ${percentLabel}">
-          <span></span>
-        </div>
-      </div>
-    `;
-  }).join("");
+    const percent = totalMinutes ? minutes / totalMinutes * 100 : 0;
+    const actual = totalMinutes ? `${percent.toFixed(1)}%` : "—";
+    const target = PRACTICE_TARGETS[category];
+    const color = category.toLowerCase().replaceAll(" ", "-");
+    return `<div class="practice-breakdown-row" style="--practice-percent:${percent}%;--practice-target:${target}%;--practice-color:var(--practice-${color})">
+      <div class="practice-breakdown-label"><strong>${category}</strong><div class="practice-percentages">
+        <span><small>Actual</small><b>${actual}</b><small>${minutes.toLocaleString("en-US")} min</small></span>
+        <span><small>Target</small><b>${target}%</b></span></div></div>
+      <div class="practice-breakdown-track" aria-label="${category}: ${minutes} recorded minutes, actual ${actual}, target ${target}%"><span></span><i class="target-marker" aria-hidden="true"></i></div>
+    </div>`;
+  }).join("") + (!totalMinutes ? '<p class="empty-note">No practice time recorded for this year. Targets are shown for planning.</p>' : '');
 }
 
-function checkedPracticeMinutes(day) {
-  return getCheckedPracticeBlocks(day).reduce((total, block) => total + block.minutes, 0);
+function getPracticeYear() {
+  return state.selectedPracticeYear || String(new Date().getFullYear());
 }
-
-function updatePracticeCardMinutes(day) {
-  const value = document.querySelector(`[data-practice-completed="${day}"]`);
-  if (value) value.textContent = checkedPracticeMinutes(day);
+function practiceLogsForYear(year) {
+  return getPracticeLogs().filter(log => String(log.date).slice(0, 4) === String(year));
 }
-
-function updatePracticeCardSummaries() {
-  Object.keys(PRACTICE_DAYS).forEach(updatePracticeCardMinutes);
+function formatPracticeTime(minutes) {
+  return minutes >= 60 ? `${Math.floor(minutes / 60)}h ${minutes % 60}m` : `${minutes} min`;
 }
-
-function updatePracticeLastDates(logs) {
-  document.querySelectorAll("[data-block-day]").forEach((input) => {
-    const lastDate = input.closest(".check-row")?.querySelector("[data-practice-last]");
-    if (!lastDate) return;
-    lastDate.textContent = formatPracticeLastDate(lastPracticeRowDate(input, logs));
+function renderPracticeYears() {
+  const years = [...new Set(["2025", String(new Date().getFullYear()), getPracticeYear(), ...Object.keys(state.years), ...getPracticeLogs().map(log => String(log.date).slice(0, 4))])].filter(year => /^\d{4}$/.test(year)).sort();
+  const previousCompare = els.practiceCompareYear.value;
+  [els.practiceYearSelect, els.practiceCompareYear].forEach(select => {
+    select.innerHTML = "";
+    years.forEach(year => {
+      const option = document.createElement("option"); option.value = year; option.textContent = year;
+      option.disabled = select === els.practiceCompareYear && year === getPracticeYear();
+      select.append(option);
+    });
+  });
+  els.practiceYearSelect.value = getPracticeYear();
+  els.practiceCompareYear.value = years.includes(previousCompare) && previousCompare !== getPracticeYear() ? previousCompare
+    : years.includes(String(Number(getPracticeYear()) - 1)) ? String(Number(getPracticeYear()) - 1)
+    : years.find(year => year !== getPracticeYear()) || getPracticeYear();
+}
+function renderPracticeComparison() {
+  const selected = getPracticeYear();
+  const compared = els.practiceCompareYear.value;
+  const logs = [practiceLogsForYear(selected), practiceLogsForYear(compared)];
+  const totals = logs.map(practiceBreakdown);
+  const minutes = logs.map(rows => rows.reduce((sum, log) => sum + practiceLogMinutes(log), 0));
+  const cell = (index, value) => logs[index].length ? value : "Not recorded";
+  els.practiceComparison.innerHTML = `<table class="practice-comparison-table"><thead><tr><th scope="col">Recorded practice</th><th scope="col">${selected}</th><th scope="col">${compared}</th></tr></thead><tbody>
+    <tr><th scope="row">Sessions</th><td>${cell(0, logs[0].length)}</td><td>${cell(1, logs[1].length)}</td></tr>
+    <tr><th scope="row">Total time</th><td>${cell(0, formatPracticeTime(minutes[0]))}</td><td>${cell(1, formatPracticeTime(minutes[1]))}</td></tr>
+    ${PRACTICE_CATEGORIES.map(category => `<tr><th scope="row">${category}</th><td>${cell(0, totals[0][category] + " min")}</td><td>${cell(1, totals[1][category] + " min")}</td></tr>`).join("")}
+    </tbody></table><p class="comparison-note">Calendar-year totals. The current year is still in progress; missing history means it was not recorded.</p>`;
+}
+function renderPracticeActivities() {
+  els.practiceActivityList.innerHTML = PRACTICE_ACTIVITIES.map(activity => `<div class="practice-activity-row">
+    <label class="activity-choice" for="activity-${activity.id}"><input type="checkbox" id="activity-${activity.id}" data-practice-activity="${activity.id}" data-block-category="${activity.category}" value="${activity.label}" />
+      <span><strong>${activity.label}</strong><small data-practice-last>Last: Not yet</small></span></label>
+    <label class="activity-duration" for="minutes-${activity.id}"><span>Minutes</span><input type="number" id="minutes-${activity.id}" data-activity-minutes="${activity.id}" value="${activity.minutes}" min="1" max="600" step="1" inputmode="numeric" /></label>
+  </div>`).join("");
+  els.practiceDate.value = todayDateString();
+  els.practiceDate.max = todayDateString();
+}
+function getActivityPracticeBlocks() {
+  return [...document.querySelectorAll("[data-practice-activity]:checked")].map(input => {
+    const activity = PRACTICE_ACTIVITIES.find(item => item.id === input.dataset.practiceActivity);
+    const minutesInput = document.querySelector(`#minutes-${activity.id}`);
+    const minutes = Number(minutesInput.value);
+    if (!Number.isInteger(minutes) || minutes < 1 || minutes > 600) throw new Error(`Enter 1–600 minutes for ${activity.label}.`);
+    return { label: `${activity.label} · ${minutes} min`, minutes, category: activity.category, activityId: activity.id };
   });
 }
-
+function updatePracticeSessionTotal() {
+  try { const blocks = getActivityPracticeBlocks(); els.practiceSelectedMinutes.textContent = `${blocks.reduce((sum, block) => sum + block.minutes, 0)} min selected`; }
+  catch { els.practiceSelectedMinutes.textContent = "Check selected activity minutes"; }
+}
+function updatePracticeLastDates(logs) {
+  document.querySelectorAll("[data-practice-activity]").forEach(input => {
+    const last = input.closest(".practice-activity-row")?.querySelector("[data-practice-last]");
+    if (last) last.textContent = formatPracticeLastDate(lastPracticeRowDate(input, logs));
+  });
+}
 function renderPractice() {
-  const logs = getPracticeLogs()
-    .slice()
-    .sort((a, b) => b.date.localeCompare(a.date) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+  const year = getPracticeYear();
+  const logs = practiceLogsForYear(year).slice().sort((a, b) => b.date.localeCompare(a.date) || String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+  renderPracticeYears();
   const start = weekStart();
-  const currentYear = new Date().getFullYear();
-  const completedThisWeek = logs.filter((log) => {
-    const [year, month, day] = log.date.split("-").map(Number);
-    return new Date(year, month - 1, day) >= start;
+  const today = todayDateString();
+  els.practiceWeekCount.textContent = getPracticeLogs().filter(log => {
+    const [y, m, d] = log.date.split("-").map(Number);
+    return new Date(y, m - 1, d) >= start && log.date <= today;
   }).length;
-  const currentYearLogs = logs.filter((log) => Number(String(log.date).slice(0, 4)) === currentYear);
-  const ytdMinutes = currentYearLogs.reduce((total, log) => total + practiceLogMinutes(log), 0);
-
-  els.practiceWeekCount.textContent = completedThisWeek;
-  els.practiceYearCount.textContent = currentYearLogs.length;
-  els.practiceYtdMinutes.textContent = `${ytdMinutes.toLocaleString("en-US")} min`;
-  renderPracticeBreakdown(currentYearLogs);
+  els.practiceYearLabel.textContent = `Sessions in ${year}`;
+  els.practiceTimeLabel.textContent = `Practice time in ${year}`;
+  els.practiceHistoryYear.textContent = `Practice History · ${year}`;
+  els.practiceYearCount.textContent = logs.length;
+  els.practiceYtdMinutes.textContent = formatPracticeTime(logs.reduce((total, log) => total + practiceLogMinutes(log), 0));
+  renderPracticeBreakdown(logs);
+  renderPracticeComparison();
   updatePracticeLastDates(logs);
-
   els.practiceHistoryList.innerHTML = "";
-  if (!logs.length) {
-    els.practiceHistoryList.innerHTML = '<p class="empty-note">No practice sessions logged yet.</p>';
-    updatePracticeCardSummaries();
-    return;
-  }
-
-  logs.forEach((log) => {
+  if (!logs.length) { els.practiceHistoryList.innerHTML = `<p class="empty-note">No practice sessions recorded for ${year}.</p>`; return; }
+  logs.forEach(log => {
     const item = document.createElement("article");
     item.className = "practice-history-item";
-    const blocks = Array.isArray(log.blocks) ? log.blocks : [];
-    const blockLabels = blocks.map((block) => (typeof block === "string" ? block : block.label)).filter(Boolean);
-    const blockText = blockLabels.length ? blockLabels.join(", ") : "No blocks saved";
+    const blockLabels = (log.blocks || []).map(block => typeof block === "string" ? block : block.label).filter(Boolean);
     const notes = log.notes ? `<em>${escapeHtml(log.notes)}</em>` : "";
-    item.innerHTML = `
-      <strong>${formatDate(log.date)}</strong>
-      <span>${PRACTICE_DAYS[log.day].label} · ${practiceLogMinutes(log)} min</span>
-      <p><b>${escapeHtml(blockText)}</b>${notes}</p>
-      <button type="button" class="delete-button" data-delete-practice="${log.id}">Delete</button>
-    `;
+    const label = log.sessionType === "activities" ? "Activities" : PRACTICE_DAYS[log.day]?.label || "Practice";
+    item.innerHTML = `<strong>${formatDate(log.date)}</strong><span>${label} · ${practiceLogMinutes(log)} min</span>
+      <p><b>${escapeHtml(blockLabels.length ? blockLabels.join(", ") : "No blocks saved")}</b>${notes}</p>
+      <button type="button" class="delete-button" data-delete-practice="${escapeHtml(log.id)}">Delete</button>`;
     els.practiceHistoryList.append(item);
   });
-  updatePracticeCardSummaries();
 }
 
 function render() {
@@ -1106,32 +1156,28 @@ function setActiveTab(tabName) {
   });
 }
 
-function completePracticeDay(day, button) {
+function logPracticeActivities(event) {
+  event.preventDefault();
+  const button = document.querySelector("#logPracticeActivities");
   if (button.disabled) return;
-  const notesInput = document.querySelector(`#practiceNotes${day}`);
-  const checkedBlocks = getCheckedPracticeBlocks(day);
-  if (!checkedBlocks.length) {
-    showToast("Select at least one practice block to log.");
-    if (navigator.vibrate) navigator.vibrate([12, 24, 12]);
-    return;
+  let blocks;
+  try { blocks = getActivityPracticeBlocks(); }
+  catch (error) { showToast(error.message); return; }
+  if (!blocks.length) { showToast("Select at least one activity to log."); return; }
+  const date = els.practiceDate.value;
+  const parsed = new Date(date + "T00:00:00Z");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || !Number.isFinite(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date || date > todayDateString()) {
+    showToast("Choose a valid session date, today or earlier."); return;
   }
-  const completedMinutes = checkedBlocks.reduce((total, block) => total + block.minutes, 0);
-  const today = todayDateString();
-  getPracticeLogs().push({
-    id: `practice-${Date.now()}-${Math.random().toString(16).slice(2)}`,
-    date: today,
-    day: Number(day),
-    minutes: completedMinutes,
-    blocks: checkedBlocks,
-    notes: notesInput.value.trim(),
-    createdAt: new Date().toISOString(),
-  });
+  getPracticeLogs().push({ id: `practice-${Date.now()}-${Math.random().toString(16).slice(2)}`, date,
+    day: 0, sessionType: "activities", minutes: blocks.reduce((sum, block) => sum + block.minutes, 0),
+    blocks, notes: els.practiceSessionNotes.value.trim(), createdAt: new Date().toISOString() });
+  state.selectedPracticeYear = date.slice(0, 4);
   saveState();
-  document.querySelectorAll(`[data-block-day="${day}"]`).forEach((input) => {
-    input.checked = false;
-  });
-  notesInput.value = "";
-  confirmQuickLog(button, `${PRACTICE_DAYS[day].label} logged.`);
+  document.querySelectorAll("[data-practice-activity]").forEach(input => { input.checked = false; });
+  els.practiceSessionNotes.value = "";
+  updatePracticeSessionTotal();
+  confirmQuickLog(button, `Practice logged for ${formatDate(date)}.`);
   renderPractice();
 }
 
@@ -1318,13 +1364,14 @@ els.tabButtons.forEach((button) => {
 
 els.newQuoteButton?.addEventListener("click", renderSwingThought);
 
-document.querySelectorAll("[data-complete-practice]").forEach((button) => {
-  button.addEventListener("click", () => completePracticeDay(button.dataset.completePractice, button));
+els.practiceSessionForm.addEventListener("submit", logPracticeActivities);
+els.practiceActivityList.addEventListener("input", updatePracticeSessionTotal);
+els.practiceActivityList.addEventListener("change", updatePracticeSessionTotal);
+els.practiceYearSelect.addEventListener("change", () => {
+  state.selectedPracticeYear = els.practiceYearSelect.value;
+  saveState(); renderPractice();
 });
-
-document.querySelectorAll("[data-block-day]").forEach((input) => {
-  input.addEventListener("change", () => updatePracticeCardMinutes(input.dataset.blockDay));
-});
+els.practiceCompareYear.addEventListener("change", renderPracticeComparison);
 
 els.practiceHistoryList.addEventListener("click", async (event) => {
   const button = event.target.closest("[data-delete-practice]");
@@ -1433,6 +1480,7 @@ els.restoreFile.addEventListener("change", async () => {
 
 setDefaultDates();
 renderSwingThought();
+renderPracticeActivities();
 render();
 if (pendingStorageNotice) showToast(pendingStorageNotice);
 

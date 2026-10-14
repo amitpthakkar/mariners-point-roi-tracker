@@ -1525,3 +1525,103 @@ dialog::backdrop {
 .cloud-bar button { color: var(--cream-100); background: transparent; border: 1px solid rgba(255,255,255,.25); padding: 6px 10px; font-size: 12px; min-height: 32px; }
 #cloudStatus { margin-left: auto; }
 #cloudStatus[data-error="true"] { color: #ffd1c9; }
+
+/* Compact membership summaries and editable practice activities. */
+:root { --practice-on-course-simulation: #426e91; }
+.membership-usage-card { margin-top: 16px; }
+.membership-usage-card h2 { margin: 0 0 8px; font-size: 1.12rem; }
+.usage-row { display: grid; grid-template-columns: 36px minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.usage-row img { width: 30px; height: 30px; object-fit: contain; }
+.usage-name h3 { margin: 0 0 3px; font-size: 1rem; }
+.usage-name span, .usage-amount span { color: var(--muted); font-size: .875rem; }
+.usage-amount { display: grid; gap: 3px; text-align: right; }
+.usage-amount strong { color: var(--green-900); font-size: 1.2rem; }
+.compact-bucket-summary { margin: 14px 0 0; gap: 0; grid-template-columns: repeat(4,minmax(0,1fr)); border-top: 1px solid var(--line); }
+.compact-bucket-summary .bucket-stat { background: transparent; box-shadow: none; border: 0; border-radius: 0; min-height: 70px; padding: 14px 5px 0; }
+.compact-bucket-summary .bucket-stat span { font-size: .875rem; }
+.compact-bucket-summary .bucket-stat strong { font-size: 1.2rem; }
+.bucket-buttons { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.bucket-buttons button { min-height: 78px; padding: 10px 8px; border-radius: 14px; }
+.bucket-buttons button span { font-size: .875rem; }
+.bucket-buttons .last-log { font-size: .75rem; }
+.practice-year-controls { display: flex; align-items: center; gap: 18px; margin: 16px 0; }
+.practice-year-controls label { min-width: 135px; font-size: .94rem; font-weight: 700; }
+.practice-year-controls p { color: var(--muted); font-size: .875rem; line-height: 1.5; margin: 0; }
+.practice-year-controls select, .practice-comparison select { display: block; width: 100%; min-height: 46px; font-size: 1rem; margin-top: 6px; }
+.practice-summary span { font-size: .875rem; line-height: 1.35; }
+.practice-summary strong { font-size: 1.35rem; }
+.practice-logger { margin-top: 16px; }
+.practice-logger .section-heading { margin-bottom: 16px; }
+#practiceSelectedMinutes { color: var(--green-700); font-size: .94rem; }
+.practice-date-label { display: grid; gap: 6px; max-width: 230px; margin-bottom: 12px; font-size: .94rem; }
+.practice-date-label input { min-height: 46px; font-size: 1rem; min-width: 0; width: 100%; }
+.practice-activity-row { display: grid; grid-template-columns: minmax(0,1fr) 92px; align-items: center; gap: 12px; border-top: 1px solid var(--line); padding: 12px 0; }
+.activity-choice { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; }
+.activity-choice input[type=checkbox] { flex: 0 0 24px; width: 24px; height: 24px; margin: 0; accent-color: var(--green-700); }
+.activity-choice span { display: grid; gap: 5px; }
+.activity-choice strong { font-size: 1rem; line-height: 1.35; }
+.activity-choice small { color: var(--muted); font-size: .81rem; line-height: 1.35; }
+.activity-duration { display: grid; gap: 5px; }
+.activity-duration span { color: var(--muted); font-size: .81rem; }
+.activity-duration input { width: 100%; min-height: 46px; font-size: 1rem; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--cream-50); }
+.practice-notes-label { display: grid; gap: 8px; margin-top: 14px; font-size: .94rem; }
+.practice-notes-label textarea { font-size: 1rem; padding: 12px; min-height: 80px; }
+#logPracticeActivities { width: 100%; margin-top: 12px; min-height: 50px; }
+.practice-recommendations, .practice-comparison { margin-top: 16px; }
+.practice-recommendations summary, .practice-comparison summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; min-height: 46px; }
+.practice-recommendations summary h2, .practice-comparison summary h2 { margin: 3px 0; font-size: 1.12rem; }
+.recommended-days { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; margin-top: 16px; }
+.recommended-day { padding: 14px; border-radius: 14px; background: var(--cream-100); }
+.recommended-day h3 { font-size: 1rem; line-height: 1.4; margin: 0 0 12px; }
+.recommended-day ul { padding: 0; margin: 0; list-style: none; }
+.recommended-day li { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px solid var(--line); font-size: .875rem; }
+.recommended-day li strong { white-space: nowrap; }
+.analytics-note, .comparison-note { font-size: .875rem; line-height: 1.5; color: var(--muted); }
+.practice-breakdown-label { flex-direction: row; align-items: center; gap: 14px; }
+.practice-breakdown-label > strong { font-size: .94rem; line-height: 1.4; }
+.practice-percentages { display: flex; gap: 18px; text-align: right; }
+.practice-percentages > span { display: grid; gap: 3px; min-width: 60px; }
+.practice-percentages small { font-size: .81rem; color: var(--muted); }
+.practice-percentages b { font-size: 1rem; color: var(--green-900); }
+.practice-breakdown-track { position: relative; overflow: visible; }
+.practice-breakdown-track > span { border-radius: inherit; }
+.practice-breakdown-track .target-marker { position: absolute; left: var(--practice-target); top: -3px; bottom: -3px; width: 2px; background: var(--green-950); transform: translateX(-1px); }
+.practice-comparison label { display: block; max-width: 180px; font-size: .94rem; margin: 14px 0; }
+.practice-comparison-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.practice-comparison-table th, .practice-comparison-table td { padding: 11px 8px; border-bottom: 1px solid var(--line); font-size: .875rem; text-align: left; overflow-wrap: anywhere; }
+.practice-comparison-table th:first-child { width: 43%; }
+.practice-comparison-table thead th { color: var(--green-900); background: var(--cream-100); }
+.cloud-bar { gap: 10px; padding: 14px 18px; }
+.cloud-status-details { display: grid; gap: 5px; flex: 1 1 310px; }
+#cloudStatus { margin-left: 0; font-size: .94rem; font-weight: 700; }
+#cloudSavedAt, #cloudPending, #historyImportStatus { font-size: .81rem; line-height: 1.4; }
+#cloudPending[data-pending=true] { color: var(--gold-300); }
+#historyImportStatus[data-error=true] { color: #ffd1c9; }
+.cloud-bar button { min-height: 44px; font-size: .875rem; }
+.tab-button, .quote-button { min-height: 44px; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 3px solid var(--gold-500); outline-offset: 3px; }
+@media (max-width:620px) {
+  .tab-button { font-size: .875rem; line-height: 1.35; }
+  .practice-summary { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; }
+  .practice-summary article { padding: 10px 8px; min-height: 84px; }
+  .practice-summary span { font-size: .81rem; line-height: 1.35; }
+  .practice-summary strong { font-size: 1.15rem; }
+  .practice-year-controls { align-items: flex-start; gap: 12px; }
+  .practice-year-controls p { font-size: .81rem; padding-top: 3px; }
+  .practice-logger .section-heading { display: block; }
+  #practiceSelectedMinutes { display: block; margin-top: 8px; }
+  .practice-activity-row { grid-template-columns: minmax(0,1fr) 80px; gap: 10px; }
+  .activity-choice { gap: 9px; }
+  .activity-choice strong { font-size: .94rem; }
+  .recommended-days { grid-template-columns: 1fr; }
+  .practice-breakdown-label { flex-direction: row; align-items: center; }
+  .practice-percentages { gap: 12px; }
+  .practice-percentages > span { min-width: 52px; }
+  .bucket-buttons { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; }
+  .bucket-buttons button span { font-size: .81rem; line-height: 1.4; }
+  .bucket-buttons .last-log { font-size: .75rem; line-height: 1.35; }
+  .compact-bucket-summary .bucket-stat span { font-size: .81rem; }
+  .cloud-bar { padding: 14px 12px 0; }
+  .cloud-status-details { flex-basis: 100%; }
+  input, select, textarea { font-size: 16px; }
+}

@@ -8,6 +8,9 @@ const bar = document.querySelector('#cloudBar');
 const message = document.querySelector('#cloudGateMessage');
 const login = document.querySelector('#googleSignIn');
 const status = document.querySelector('#cloudStatus');
+const savedAtLabel = document.querySelector('#cloudSavedAt');
+const pendingLabel = document.querySelector('#cloudPending');
+const historyLabel = document.querySelector('#historyImportStatus');
 const retry = document.querySelector('#cloudRetry');
 const reload = document.querySelector('#cloudReload');
 const META = 'roi-cloud-meta-v1';
@@ -16,12 +19,33 @@ const ORIGINAL = 'roi-cloud-before-migration-v1';
 let auth, authSdk, db, fs, ref, revision = 0, ready = false, pending = null;
 let saving = false, conflict = false, stopListening = null, timer, session = 0;
 let importingHistory = false;
+let lastSavedAt = null, cloudHistorySaved = false, historyError = '', syncError = false;
+
+function hasHistory(state) { return Boolean(state.years?.['2025']?.historyImports?.[HISTORY_IMPORT_ID]); }
+function updateCloudDetails() {
+  const date = lastSavedAt ? new Date(lastSavedAt) : null;
+  savedAtLabel.textContent = date && Number.isFinite(date.getTime())
+    ? 'Last cloud save: ' + date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    : 'Last cloud save time unavailable';
+  const count = pending ? pending.changeCount || 1 : 0;
+  pendingLabel.textContent = count ? `${count} update${count === 1 ? '' : 's'} pending` : 'No pending changes';
+  pendingLabel.dataset.pending = String(Boolean(count));
+  const localHistory = hasHistory(window.roiTracker.read());
+  historyLabel.textContent = historyError ? '2025 history: ' + historyError + '. Retry import.'
+    : cloudHistorySaved && localHistory ? '2025 history: imported and saved to cloud'
+    : localHistory ? '2025 history: loaded on this device, cloud save pending'
+    : importingHistory ? '2025 history: importing...'
+    : '2025 history: not imported yet';
+  historyLabel.dataset.error = String(Boolean(historyError));
+  retry.hidden = (!syncError && !historyError) || conflict;
+}
 
 function setStatus(text, error = false) {
+  syncError = error;
   status.textContent = text;
   status.dataset.error = String(error);
-  retry.hidden = !error || conflict;
   reload.hidden = !conflict;
+  updateCloudDetails();
 }
 function lock(text) {
   ready = false;
@@ -34,18 +58,22 @@ function unlock() {
   ready = true;
 }
 function storeMeta() {
-  localStorage.setItem(META, JSON.stringify({ uid: auth.currentUser.uid, revision, migrated: true }));
+  localStorage.setItem(META, JSON.stringify({ uid: auth.currentUser.uid, revision, migrated: true, lastSavedAt }));
 }
 function acceptSnapshot(snapshot) {
   const doc = snapshot.data();
   if (!doc || typeof doc.stateJson !== 'string' || !Number.isInteger(doc.revision)) throw new Error('Invalid tracker data');
   revision = doc.revision;
-  window.roiTracker.apply(JSON.parse(doc.stateJson));
+  const state = JSON.parse(doc.stateJson);
+  lastSavedAt = doc.updatedAt || null;
+  cloudHistorySaved = hasHistory(state);
+  if (cloudHistorySaved) historyError = '';
+  window.roiTracker.apply(state);
   storeMeta();
   setStatus('Cloud saved');
 }
 function keepPending(state) {
-  pending = { uid: auth.currentUser.uid, revision, state };
+  pending = { uid: auth.currentUser.uid, revision, state, changeCount: (pending?.changeCount || (pending ? 1 : 0)) + 1 };
   localStorage.setItem(PENDING, JSON.stringify(pending));
 }
 async function flush() {
@@ -54,6 +82,7 @@ async function flush() {
   saving = true;
   const sending = pending;
   const thisSession = session;
+  const savedAt = new Date().toISOString();
   setStatus('Saving to cloud...');
   try {
     const nextRevision = await fs.runTransaction(db, async transaction => {
@@ -62,14 +91,20 @@ async function flush() {
         const error = new Error('Another device has newer changes'); error.code = 'roi/conflict'; throw error;
       }
       const next = sending.revision + 1;
-      transaction.update(ref, { stateJson: JSON.stringify(sending.state), revision: next, updatedAt: new Date().toISOString() });
+      transaction.update(ref, { stateJson: JSON.stringify(sending.state), revision: next, updatedAt: savedAt });
       return next;
     });
     if (thisSession !== session) return;
     revision = nextRevision;
+    lastSavedAt = savedAt;
+    cloudHistorySaved = hasHistory(sending.state);
     storeMeta();
     if (pending === sending) { pending = null; localStorage.removeItem(PENDING); }
-    else { pending.revision = revision; localStorage.setItem(PENDING, JSON.stringify(pending)); }
+    else {
+      pending.revision = revision;
+      pending.changeCount = Math.max(1, (pending.changeCount || 1) - (sending.changeCount || 1));
+      localStorage.setItem(PENDING, JSON.stringify(pending));
+    }
     setStatus(pending ? 'Saving to cloud...' : 'Cloud saved');
   } catch (error) {
     if (thisSession !== session) return;
@@ -98,9 +133,11 @@ function resumeEdits() {
   for (const type of ['click', 'input', 'change', 'submit']) main.removeEventListener(type, pauseEdits, true);
 }
 async function importApprovedHistory() {
-  if (!ready || conflict || importingHistory || window.roiTracker.read().years?.['2025']?.historyImports?.[HISTORY_IMPORT_ID]) return;
+  if (!ready || conflict || importingHistory || hasHistory(window.roiTracker.read())) { updateCloudDetails(); return; }
   const thisSession = session;
   importingHistory = true;
+  historyError = '';
+  updateCloudDetails();
   try {
     const token = await auth.currentUser.getIdToken();
     const response = await fetch('/.netlify/functions/history-2025', {
@@ -123,11 +160,12 @@ async function importApprovedHistory() {
     }
   } catch (error) {
     if (thisSession === session && ready && !conflict) {
-      setStatus('2025 history: ' + error.message + '. Tap Retry.', true);
+      historyError = error.message;
+      updateCloudDetails();
       console.warn('History import:', error.message);
     }
   } finally {
-    if (thisSession === session) importingHistory = false;
+    if (thisSession === session) { importingHistory = false; updateCloudDetails(); }
   }
 }
 window.addEventListener('roi-state-saved', event => {
@@ -190,6 +228,7 @@ try {
     const thisSession = ++session;
     if (stopListening) { stopListening(); stopListening = null; }
     clearTimeout(timer); resumeEdits(); conflict = false; importingHistory = false;
+    lastSavedAt = null; cloudHistorySaved = false; historyError = ''; syncError = false;
     lock(user ? 'Loading your saved tracker...' : 'Use your approved Google account to continue.');
     if (!user) { login.textContent = 'Continue with Google'; login.disabled = false; return; }
     if (user.email?.toLowerCase() !== OWNER || !user.emailVerified) {
@@ -199,6 +238,8 @@ try {
       const snapshot = await f.getDocFromServer(ref);
       if (thisSession !== session) return;
       if (!snapshot.exists()) throw new Error('Tracker migration is not ready');
+      lastSavedAt = snapshot.data().updatedAt || null;
+      cloudHistorySaved = hasHistory(JSON.parse(snapshot.data().stateJson));
       let meta = {}; let storedPending;
       try { meta = JSON.parse(localStorage.getItem(META) || '{}'); storedPending = JSON.parse(localStorage.getItem(PENDING) || 'null'); } catch { /* Keep existing tracker state. */ }
       if (storedPending?.uid === user.uid) {

@@ -16,7 +16,7 @@
     <meta name="apple-mobile-web-app-title" content="Mariners Point" />
     <meta name="application-name" content="Mariners Point" />
     <meta name="theme-color" content="#0f172a" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles.css?v=20261014-practice" />
   </head>
   <body>
     <section id="cloudGate" class="cloud-gate" aria-labelledby="cloudTitle">
@@ -30,7 +30,7 @@
     </section>
     <div id="cloudBar" class="cloud-bar" hidden>
       <span id="cloudAccount"></span>
-      <span id="cloudStatus" role="status"></span>
+      <div class="cloud-status-details"><span id="cloudStatus" role="status"></span><span id="cloudSavedAt"></span><span id="cloudPending" role="status"></span><span id="historyImportStatus" role="status"></span></div>
       <button type="button" id="cloudRetry" hidden>Retry sync</button>
       <button type="button" id="cloudReload" hidden>Load cloud version</button>
       <button type="button" id="googleSignOut">Sign out</button>
@@ -135,41 +135,7 @@
         </div>
       </section>
 
-      <section class="metrics-grid" aria-label="Usage totals">
-        <article class="metric">
-          <div class="metric-topline">
-            <span class="metric-icon">
-              <img src="assets/bunker.svg" alt="Bunker" />
-            </span>
-            <span>$8 each</span>
-          </div>
-          <p class="metric-value" id="shortGameValue">$0</p>
-          <h2>Short game</h2>
-          <p id="shortGameCount">0 visits</p>
-        </article>
-        <article class="metric">
-          <div class="metric-topline">
-            <span class="metric-icon">
-              <img src="assets/golf-flag.svg" alt="Golf flag" />
-            </span>
-            <span>$15 each</span>
-          </div>
-          <p class="metric-value" id="roundValue">$0</p>
-          <h2>Rounds</h2>
-          <p id="roundCount">0 rounds</p>
-        </article>
-        <article class="metric">
-          <div class="metric-topline">
-            <span class="metric-icon">
-              <img src="assets/yellow-basket.svg" alt="Yellow basket" />
-            </span>
-            <span>$5 each</span>
-          </div>
-          <p class="metric-value" id="yellowBasketValue">$0</p>
-          <h2>Yellow Basket</h2>
-          <p id="yellowBasketCount">0 logged</p>
-        </article>
-      </section>
+      <section class="membership-usage-card history-panel" aria-label="Usage totals"><h2>Membership usage</h2><div class="usage-row"><img src="assets/bunker.svg" alt="" /><div class="usage-name"><h3>Short game</h3><span id="shortGameCount">0 logged</span></div><div class="usage-amount"><strong id="shortGameValue">$0</strong><span>$8 each</span></div></div><div class="usage-row"><img src="assets/golf-flag.svg" alt="" /><div class="usage-name"><h3>Rounds</h3><span id="roundCount">0 logged</span></div><div class="usage-amount"><strong id="roundValue">$0</strong><span>$15 each</span></div></div><div class="usage-row"><img src="assets/yellow-basket.svg" alt="" /><div class="usage-name"><h3>Yellow Basket</h3><span id="yellowBasketCount">0 logged</span></div><div class="usage-amount"><strong id="yellowBasketValue">$0</strong><span>$5 each</span></div></div></section>
 
       <section class="action-grid" aria-label="Logging controls">
         <article class="bucket-panel" aria-labelledby="bucket-title">
@@ -198,11 +164,7 @@
               <small class="last-log" data-last-logged="large-bucket">Not logged yet</small>
             </button>
           </div>
-        </article>
-
-      </section>
-
-      <section class="bucket-summary" aria-label="Bucket totals">
+      <section class="bucket-summary compact-bucket-summary" aria-label="Bucket totals">
         <article class="bucket-stat">
           <span>Small</span>
           <strong id="smallBucketCount">0</strong>
@@ -219,6 +181,10 @@
           <span>Bucket value</span>
           <strong id="bucketSpend">$0</strong>
         </article>
+      </section>
+
+        </article>
+
       </section>
 
       <section class="manual-panel entry-panel" aria-labelledby="entry-title">
@@ -325,93 +291,21 @@
           <button type="button" class="quote-button" id="newQuoteButton" aria-label="Show a new swing thought">New quote</button>
         </section>
 
-        <section class="practice-summary" aria-label="Practice summary">
-          <article>
-            <span>Completed This Week</span>
-            <strong id="practiceWeekCount">0</strong>
-          </article>
-          <article>
-            <span>Total Completed This Year</span>
-            <strong id="practiceYearCount">0</strong>
-          </article>
-          <article>
-            <span>Total Practice Time YTD</span>
-            <strong id="practiceYtdMinutes">0 min</strong>
-          </article>
+        <div class="practice-year-controls"><label for="practiceYearSelect">Practice year<select id="practiceYearSelect"></select></label><p>Analytics and history follow this year. New sessions save to the date you choose.</p></div>
+        <section class="practice-summary" aria-label="Practice summary"><article><span>This week · all sessions</span><strong id="practiceWeekCount">0</strong></article><article><span id="practiceYearLabel">Sessions this year</span><strong id="practiceYearCount">0</strong></article><article><span id="practiceTimeLabel">Practice time this year</span><strong id="practiceYtdMinutes">0 min</strong></article></section>
+        <section class="practice-logger history-panel" aria-labelledby="practice-log-title"><div class="section-heading"><div><p class="eyebrow">Choose what you worked on</p><h2 id="practice-log-title">Log practice activities</h2></div><strong id="practiceSelectedMinutes">0 min selected</strong></div>
+          <form id="practiceSessionForm" novalidate><label class="practice-date-label" for="practiceDate">Session date<input type="date" id="practiceDate" required /></label><div id="practiceActivityList"></div><label class="practice-notes-label" for="practiceSessionNotes">Session notes<textarea id="practiceSessionNotes" rows="3" placeholder="What worked? What will you focus on next?"></textarea></label><button type="submit" id="logPracticeActivities">Log selected activities</button></form>
         </section>
-
-        <section class="practice-breakdown-panel" aria-labelledby="practice-breakdown-title">
-          <div class="practice-breakdown-heading">
-            <div>
-              <p class="eyebrow">Analytics</p>
-              <h2 id="practice-breakdown-title">Practice Time Breakdown</h2>
-            </div>
-          </div>
-          <div class="practice-breakdown-chart" id="practiceBreakdownChart"></div>
-        </section>
-
-        <section class="practice-days" aria-label="Practice day plans">
-          <article class="practice-card" data-practice-day="1">
-            <div class="practice-card-top">
-              <div>
-                <p class="eyebrow">Day 1</p>
-                <h2>Technique, driver, scoring drills</h2>
-              </div>
-              <strong><span data-practice-completed="1">0</span>/90 min</strong>
-            </div>
-            <div class="practice-blocks">
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="1" data-block-minutes="30" data-block-category="Technique" value="Technique Work · 30 min" /><span class="practice-block-label">Technique Work · 30 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="1" data-block-minutes="30" data-block-category="Driver" value="Driver Accuracy · 30 min" /><span class="practice-block-label">Driver Accuracy · 30 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="1" data-block-minutes="15" data-block-category="Putting" value="4-5-6 Putting Drill · 15 min" /><span class="practice-block-label">4-5-6 Putting Drill · 15 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="1" data-block-minutes="15" data-block-category="Putting" value="Endzone Lag Putting · 15 min" /><span class="practice-block-label">Endzone Lag Putting · 15 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-            </div>
-            <textarea id="practiceNotes1" rows="3" placeholder="Driver felt better today"></textarea>
-            <button type="button" data-complete-practice="1">Log Day 1</button>
-          </article>
-
-          <article class="practice-card" data-practice-day="2">
-            <div class="practice-card-top">
-              <div>
-                <p class="eyebrow">Day 2</p>
-                <h2>Technique, wedges, short game</h2>
-              </div>
-              <strong><span data-practice-completed="2">0</span>/90 min</strong>
-            </div>
-            <div class="practice-blocks">
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="2" data-block-minutes="30" data-block-category="Technique" value="Technique Work · 30 min" /><span class="practice-block-label">Technique Work · 30 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="2" data-block-minutes="20" data-block-category="Pitching" value="Pitching / Wedges · 20 min" /><span class="practice-block-label">Pitching / Wedges · 20 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="2" data-block-minutes="25" data-block-category="Chipping" value="Chipping · 25 min" /><span class="practice-block-label">Chipping · 25 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="2" data-block-minutes="15" data-block-category="Bunker" value="Bunker Work · 15 min" /><span class="practice-block-label">Bunker Work · 15 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-            </div>
-            <textarea id="practiceNotes2" rows="3" placeholder="Wedges were dialed"></textarea>
-            <button type="button" data-complete-practice="2">Log Day 2</button>
-          </article>
-
-          <article class="practice-card" data-practice-day="3">
-            <div class="practice-card-top">
-              <div>
-                <p class="eyebrow">Day 3</p>
-                <h2>Technique, putting, chipping</h2>
-              </div>
-              <strong><span data-practice-completed="3">0</span>/85 min</strong>
-            </div>
-            <div class="practice-blocks">
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="3" data-block-minutes="30" data-block-category="Technique" value="Technique Work · 30 min" /><span class="practice-block-label">Technique Work · 30 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="3" data-block-minutes="20" data-block-category="Putting" value="4-5-6 Putting Drill · 20 min" /><span class="practice-block-label">4-5-6 Putting Drill · 20 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="3" data-block-minutes="20" data-block-category="Putting" value="Endzone Lag Putting · 20 min" /><span class="practice-block-label">Endzone Lag Putting · 20 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-              <label class="check-row"><span class="practice-row-main"><input type="checkbox" data-block-day="3" data-block-minutes="15" data-block-category="Chipping" value="Chipping · 15 min" /><span class="practice-block-label">Chipping · 15 min</span></span><span class="practice-last" data-practice-last>Last: Not yet</span></label>
-            </div>
-            <textarea id="practiceNotes3" rows="3" placeholder="Putting drill was tough"></textarea>
-            <button type="button" data-complete-practice="3">Log Day 3</button>
-          </article>
-        </section>
+        <section class="practice-recommendations history-panel"><details><summary><div><p class="eyebrow">Optional structure</p><h2>Recommended practice sessions</h2></div><span class="summary-cue">View plans</span></summary><div class="recommended-days"><article class="recommended-day"><p class="eyebrow">Day 1 · 90 min</p><h3>Technique, driver, scoring drills</h3><ul><li><span>Technique Work</span><strong>30 min</strong></li><li><span>Driver Accuracy</span><strong>30 min</strong></li><li><span>4-5-6 Putting Drill</span><strong>15 min</strong></li><li><span>Endzone Lag Putting</span><strong>15 min</strong></li></ul></article><article class="recommended-day"><p class="eyebrow">Day 2 · 90 min</p><h3>Technique, wedges, short game</h3><ul><li><span>Technique Work</span><strong>30 min</strong></li><li><span>Pitching / Wedges</span><strong>20 min</strong></li><li><span>Chipping</span><strong>25 min</strong></li><li><span>Bunker Work</span><strong>15 min</strong></li></ul></article><article class="recommended-day"><p class="eyebrow">Day 3 · 85 min</p><h3>Technique, putting, chipping</h3><ul><li><span>Technique Work</span><strong>30 min</strong></li><li><span>4-5-6 Putting Drill</span><strong>20 min</strong></li><li><span>Endzone Lag Putting</span><strong>20 min</strong></li><li><span>Chipping</span><strong>15 min</strong></li></ul></article></div></details></section>
+        <section class="practice-breakdown-panel" aria-labelledby="practice-breakdown-title"><div class="practice-breakdown-heading"><div><p class="eyebrow">Analytics</p><h2 id="practice-breakdown-title">Practice Time Breakdown</h2><p class="analytics-note">Actual is your share of recorded minutes. The marker shows your target. Targets total 100%.</p></div></div><div class="practice-breakdown-chart" id="practiceBreakdownChart"></div></section>
+        <section class="practice-comparison history-panel"><details><summary><div><p class="eyebrow">See your progress over time</p><h2>Compare practice years</h2></div><span class="summary-cue">View comparison</span></summary><label for="practiceCompareYear">Compare with<select id="practiceCompareYear"></select></label><div id="practiceComparison"></div></details></section>
 
         <section class="practice-history-panel" aria-labelledby="practice-history-title">
           <details>
             <summary>
               <div>
                 <p class="eyebrow">Practice history</p>
-                <h2 id="practice-history-title">Practice History</h2>
+                <h2 id="practice-history-title"><span id="practiceHistoryYear">Practice History</span></h2>
               </div>
               <span class="summary-cue">Open</span>
             </summary>
@@ -434,7 +328,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <input type="file" id="restoreFile" accept="application/json" hidden />
-    <script src="app.js?v=20261013-year2025"></script>
-    <script type="module" src="cloud.js?v=20261013-importfix2"></script>
+    <script src="app.js?v=20261014-practice"></script>
+    <script type="module" src="cloud.js?v=20261014-status"></script>
   </body>
 </html>
