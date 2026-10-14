@@ -453,21 +453,12 @@ function formatDate(dateString) {
 
 function formatLastLoggedDate(dateString) {
   if (!dateString) return "Not logged yet";
-  const [year, month, day] = dateString.split("-").map(Number);
-  const currentYear = new Date().getFullYear();
-  const selectedYear = Number(getSelectedYear());
-  const options = { month: "short", day: "numeric" };
-  if (year !== currentYear || year !== selectedYear) options.year = "numeric";
-  return `Last logged: ${new Date(year, month - 1, day).toLocaleDateString("en-US", options)}`;
+  return `Last logged: ${formatDate(dateString)}`;
 }
 
 function formatPracticeLastDate(dateString) {
   if (!dateString) return "Last: Not yet";
-  const [year, month, day] = dateString.split("-").map(Number);
-  const currentYear = new Date().getFullYear();
-  const options = { month: "short", day: "numeric" };
-  if (year !== currentYear) options.year = "numeric";
-  return `Last: ${new Date(year, month - 1, day).toLocaleDateString("en-US", options)}`;
+  return `Last: ${formatDate(dateString)}`;
 }
 
 function monthLabel(dateString) {
@@ -890,10 +881,9 @@ function renderPracticeBreakdown(logs) {
     const target = PRACTICE_TARGETS[category];
     const color = category.toLowerCase().replaceAll(" ", "-");
     return `<div class="practice-breakdown-row" style="--practice-percent:${percent}%;--practice-target:${target}%;--practice-color:var(--practice-${color})">
-      <div class="practice-breakdown-label"><strong>${category}</strong><div class="practice-percentages">
-        <span><small>Actual</small><b>${actual}</b><small>${minutes.toLocaleString("en-US")} min</small></span>
-        <span><small>Target</small><b>${target}%</b></span></div></div>
-      <div class="practice-breakdown-track" aria-label="${category}: ${minutes} recorded minutes, actual ${actual}, target ${target}%"><span></span><i class="target-marker" aria-hidden="true"></i></div>
+      <div class="practice-breakdown-label"><strong>${category}</strong><small>${minutes.toLocaleString("en-US")} min recorded</small></div>
+      <div class="practice-bar-line"><span>Actual</span><div class="practice-breakdown-track" aria-label="${category}: actual ${actual}"><span></span></div><strong>${actual}</strong></div>
+      <div class="practice-bar-line target-line"><span>Target</span><div class="practice-breakdown-track" aria-label="${category}: target ${target}%"><span></span></div><strong>${target}%</strong></div>
     </div>`;
   }).join("") + (!totalMinutes ? '<p class="empty-note">No practice time recorded for this year. Targets are shown for planning.</p>' : '');
 }
@@ -998,6 +988,7 @@ function renderPractice() {
 }
 
 function render() {
+  renderDateLabels();
   const year = getSelectedYear();
   ensureYear(year);
   renderYearOptions();
@@ -1059,6 +1050,14 @@ function setDefaultDates() {
   const date = selectedYearDate();
   els.visitDate.value = date;
   els.bucketDate.value = date;
+}
+
+function renderDateLabels() {
+  ["practiceDate", "bucketDate", "visitDate"].forEach(id => {
+    const input = document.querySelector(`#${id}`);
+    const output = document.querySelector(`#${id}Display`);
+    if (output) output.textContent = input?.value ? formatDate(input.value) : "Choose a date";
+  });
 }
 
 function alignDateToSelectedYear(input) {
@@ -1482,6 +1481,9 @@ setDefaultDates();
 renderSwingThought();
 renderPracticeActivities();
 render();
+["practiceDate", "bucketDate", "visitDate"].forEach(id => {
+  document.querySelector(`#${id}`).addEventListener("change", renderDateLabels);
+});
 if (pendingStorageNotice) showToast(pendingStorageNotice);
 
 window.roiTracker = {

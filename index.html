@@ -16,7 +16,7 @@
     <meta name="apple-mobile-web-app-title" content="Mariners Point" />
     <meta name="application-name" content="Mariners Point" />
     <meta name="theme-color" content="#0f172a" />
-    <link rel="stylesheet" href="styles.css?v=20261014-practice" />
+    <link rel="stylesheet" href="styles.css?v=20261014-polish" />
   </head>
   <body>
     <section id="cloudGate" class="cloud-gate" aria-labelledby="cloudTitle">
@@ -149,6 +149,7 @@
           <label class="bucket-date">
             Date
             <input type="date" id="bucketDate" required />
+            <span class="date-display" id="bucketDateDisplay"></span>
           </label>
           <div class="bucket-buttons" aria-label="Log bucket">
             <button type="button" data-bucket-size="small">
@@ -200,6 +201,7 @@
             <label>
               Date
               <input type="date" id="visitDate" required />
+              <span class="date-display" id="visitDateDisplay"></span>
             </label>
             <label class="check-row">
               <input type="checkbox" id="shortGameInput" />
@@ -294,10 +296,10 @@
         <div class="practice-year-controls"><label for="practiceYearSelect">Practice year<select id="practiceYearSelect"></select></label><p>Analytics and history follow this year. New sessions save to the date you choose.</p></div>
         <section class="practice-summary" aria-label="Practice summary"><article><span>This week · all sessions</span><strong id="practiceWeekCount">0</strong></article><article><span id="practiceYearLabel">Sessions this year</span><strong id="practiceYearCount">0</strong></article><article><span id="practiceTimeLabel">Practice time this year</span><strong id="practiceYtdMinutes">0 min</strong></article></section>
         <section class="practice-logger history-panel" aria-labelledby="practice-log-title"><div class="section-heading"><div><p class="eyebrow">Choose what you worked on</p><h2 id="practice-log-title">Log practice activities</h2></div><strong id="practiceSelectedMinutes">0 min selected</strong></div>
-          <form id="practiceSessionForm" novalidate><label class="practice-date-label" for="practiceDate">Session date<input type="date" id="practiceDate" required /></label><div id="practiceActivityList"></div><label class="practice-notes-label" for="practiceSessionNotes">Session notes<textarea id="practiceSessionNotes" rows="3" placeholder="What worked? What will you focus on next?"></textarea></label><button type="submit" id="logPracticeActivities">Log selected activities</button></form>
+          <form id="practiceSessionForm" novalidate><label class="practice-date-label" for="practiceDate">Session date<input type="date" id="practiceDate" required /><span class="date-display" id="practiceDateDisplay"></span></label><div id="practiceActivityList"></div><label class="practice-notes-label" for="practiceSessionNotes">Session notes<textarea id="practiceSessionNotes" rows="3" placeholder="What worked? What will you focus on next?"></textarea></label><button type="submit" id="logPracticeActivities">Log selected activities</button></form>
         </section>
         <section class="practice-recommendations history-panel"><details><summary><div><p class="eyebrow">Optional structure</p><h2>Recommended practice sessions</h2></div><span class="summary-cue">View plans</span></summary><div class="recommended-days"><article class="recommended-day"><p class="eyebrow">Day 1 · 90 min</p><h3>Technique, driver, scoring drills</h3><ul><li><span>Technique Work</span><strong>30 min</strong></li><li><span>Driver Accuracy</span><strong>30 min</strong></li><li><span>4-5-6 Putting Drill</span><strong>15 min</strong></li><li><span>Endzone Lag Putting</span><strong>15 min</strong></li></ul></article><article class="recommended-day"><p class="eyebrow">Day 2 · 90 min</p><h3>Technique, wedges, short game</h3><ul><li><span>Technique Work</span><strong>30 min</strong></li><li><span>Pitching / Wedges</span><strong>20 min</strong></li><li><span>Chipping</span><strong>25 min</strong></li><li><span>Bunker Work</span><strong>15 min</strong></li></ul></article><article class="recommended-day"><p class="eyebrow">Day 3 · 85 min</p><h3>Technique, putting, chipping</h3><ul><li><span>Technique Work</span><strong>30 min</strong></li><li><span>4-5-6 Putting Drill</span><strong>20 min</strong></li><li><span>Endzone Lag Putting</span><strong>20 min</strong></li><li><span>Chipping</span><strong>15 min</strong></li></ul></article></div></details></section>
-        <section class="practice-breakdown-panel" aria-labelledby="practice-breakdown-title"><div class="practice-breakdown-heading"><div><p class="eyebrow">Analytics</p><h2 id="practice-breakdown-title">Practice Time Breakdown</h2><p class="analytics-note">Actual is your share of recorded minutes. The marker shows your target. Targets total 100%.</p></div></div><div class="practice-breakdown-chart" id="practiceBreakdownChart"></div></section>
+        <section class="practice-breakdown-panel" aria-labelledby="practice-breakdown-title"><div class="practice-breakdown-heading"><div><p class="eyebrow">Analytics</p><h2 id="practice-breakdown-title">Practice Time Breakdown</h2><p class="analytics-note">Actual is your share of recorded minutes. The gold bar underneath shows your target on the same scale. Targets total 100%.</p></div></div><div class="practice-breakdown-chart" id="practiceBreakdownChart"></div></section>
         <section class="practice-comparison history-panel"><details><summary><div><p class="eyebrow">See your progress over time</p><h2>Compare practice years</h2></div><span class="summary-cue">View comparison</span></summary><label for="practiceCompareYear">Compare with<select id="practiceCompareYear"></select></label><div id="practiceComparison"></div></details></section>
 
         <section class="practice-history-panel" aria-labelledby="practice-history-title">
@@ -328,7 +330,7 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <input type="file" id="restoreFile" accept="application/json" hidden />
-    <script src="app.js?v=20261014-practice"></script>
+    <script src="app.js?v=20261014-polish"></script>
     <script type="module" src="cloud.js?v=20261014-status"></script>
   </body>
 </html>
