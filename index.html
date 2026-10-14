@@ -16,7 +16,7 @@
     <meta name="apple-mobile-web-app-title" content="Mariners Point" />
     <meta name="application-name" content="Mariners Point" />
     <meta name="theme-color" content="#0f172a" />
-    <link rel="stylesheet" href="styles.css?v=20261014-polish" />
+    <link rel="stylesheet" href="styles.css?v=20261014-clubhouse" />
   </head>
   <body>
     <section id="cloudGate" class="cloud-gate" aria-labelledby="cloudTitle">
@@ -28,13 +28,6 @@
         <p id="cloudGateMessage" role="status">Connecting securely...</p>
       </div>
     </section>
-    <div id="cloudBar" class="cloud-bar" hidden>
-      <span id="cloudAccount"></span>
-      <div class="cloud-status-details"><span id="cloudStatus" role="status"></span><span id="cloudSavedAt"></span><span id="cloudPending" role="status"></span><span id="historyImportStatus" role="status"></span></div>
-      <button type="button" id="cloudRetry" hidden>Retry sync</button>
-      <button type="button" id="cloudReload" hidden>Load cloud version</button>
-      <button type="button" id="googleSignOut">Sign out</button>
-    </div>
     <main class="app-shell" inert hidden>
       <nav class="app-tabs" aria-label="App sections">
         <button type="button" class="tab-button active" data-tab-target="roi">Mariners Point Membership Status</button>
@@ -316,6 +309,17 @@
         </section>
       </section>
     </main>
+
+    <footer id="cloudBar" class="cloud-bar" aria-label="Cloud sync" hidden>
+      <details class="sync-drawer">
+        <summary><span id="cloudStatus" role="status"></span><span id="cloudPending" role="status"></span><span class="sync-cue">Details <span aria-hidden="true">⌃</span></span></summary>
+        <div class="sync-body"><span id="cloudAccount"></span><div class="cloud-status-details"><span id="cloudSavedAt"></span><span id="historyImportStatus" role="status"></span></div><div class="sync-actions">
+          <button type="button" id="cloudRetry" hidden>Retry sync</button>
+          <button type="button" id="cloudReload" hidden>Load cloud version</button>
+          <button type="button" id="googleSignOut">Sign out</button>
+        </div></div>
+      </details>
+    </footer>
 
     <dialog id="confirmDialog">
       <form method="dialog" class="confirm-card">
