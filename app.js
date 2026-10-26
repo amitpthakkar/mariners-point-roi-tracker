@@ -528,7 +528,7 @@ function describeBucket(bucket) {
   return `${option?.label || bucket.size} bucket`;
 }
 
-function calculateRoiTotals(visits, membershipCost = MEMBERSHIP_COST) {
+function calculateRoiTotals(visits, membershipCost = MEMBERSHIP_COST, buckets = []) {
   const shortGameCount = visits.filter((visit) => visit.shortGame).length;
   const roundCount = visits.reduce((total, visit) => total + roundUnits(visit), 0);
   const yellowBasketCount = visits.filter((visit) => visit.yellowBasket).length;
@@ -540,7 +540,8 @@ function calculateRoiTotals(visits, membershipCost = MEMBERSHIP_COST) {
   const yellowBasketValue = yellowBasketCount * YELLOW_BASKET_PRICE;
   const totalUsed = shortGameValue + roundValue + yellowBasketValue;
   const balance = Math.max(membershipCost - totalUsed, 0);
-  const visitCount = visits.length;
+  // One calendar day is one visit; keep each activity and its value separate.
+  const visitCount = new Set([...visits, ...buckets].map((activity) => activity.date)).size;
   const roiPercent = membershipCost > 0 ? (totalUsed / membershipCost) * 100 : 0;
   const breakEvenDate = visits
     .slice()
@@ -996,7 +997,7 @@ function render() {
   const roiVisits = getRoiVisits(year);
   const buckets = getBuckets(year);
   const membershipCost = getMembershipCost(year);
-  const roiTotals = calculateRoiTotals(roiVisits, membershipCost);
+  const roiTotals = calculateRoiTotals(roiVisits, membershipCost, buckets);
   const bucketTotals = calculateBucketTotals(buckets);
 
   if (document.activeElement !== els.membershipCostInput) {
